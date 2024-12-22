@@ -27,6 +27,7 @@ func (a *airport) QueryFinishAirportWithFinishTimeByPage(ctx context.Context, pa
 func (a *airport) QueryRunningAirportWithWeightByPage(ctx context.Context, address string, page int, pageSize int) ([]*model.Airport, error) {
 	return dao.GetAirport().QueryRunningAirportWithWeightByPage(ctx, address, page, pageSize)
 }
+
 func (a *airport) QueryMyAirportByPage(ctx context.Context, address string, page int, pageSize int) (res []*dao.MyAirportView, err error) {
 	return dao.GetAirport().QueryMyAirportWithUpdateByPage(ctx, address, page, pageSize)
 }

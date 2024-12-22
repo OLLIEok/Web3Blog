@@ -9,7 +9,6 @@ export default function App() {
   const [selectedWallet, setSelectedWallet] = useState();
   const [userAccount, setUserAccount] = useState('');
   const [searchWalletModal,setSearchWalletModal] = useState(false);
-
     return (
         <>
           <Web3Wallet.Provider value={{searchWalletModal,setSearchWalletModal,selectedWallet,setSelectedWallet,userAccount,setUserAccount}}>
@@ -24,6 +23,7 @@ export default function App() {
                 rtl={false}
                 pauseOnFocusLoss
                 draggable
+                limit={1}
                 pauseOnHover
                 theme="light"
                 transition={Bounce}

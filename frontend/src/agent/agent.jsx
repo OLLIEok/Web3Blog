@@ -25,7 +25,7 @@ export default function Agent({setSearchWalletModal}) {
             req.set('Authorization', `Bearer ${Authorization}`);
         }
     }
-
+    const [isAdmin,setIsAdmin] = useState(false);
     const [Authorization, setAuth] = useState(localStorage.getItem(localStorageKey));
     const encode = encodeURIComponent;
 
@@ -36,6 +36,9 @@ export default function Agent({setSearchWalletModal}) {
         } else {
             localStorage.removeItem(localStorageKey);
         }
+    }
+    const SetIsAdmin=(flag)=>{
+        setIsAdmin(flag);
     }
     const requests = {
         del: url =>
@@ -124,7 +127,7 @@ export default function Agent({setSearchWalletModal}) {
         Login: (signs) => requests.post(`/user/login`, signs)
     }
     return (
-        <HttpAgent.Provider value={{ AirportClient, CommentClient, Authorization, SetAuthorization, UserClient, LikeClient, ArticleClient, TagClient, API_ROOT }}>
+        <HttpAgent.Provider value={{isAdmin,SetIsAdmin,AirportClient, CommentClient, Authorization, SetAuthorization, UserClient, LikeClient, ArticleClient, TagClient, API_ROOT }}>
             
             <DiscoverWalletProviders />
             <Router>

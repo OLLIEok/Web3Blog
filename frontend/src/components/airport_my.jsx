@@ -120,10 +120,10 @@ const EditableCell = ({
     }
     return <td {...restProps}>{childNode}</td>;
 };
-const MyAirport = (props) => {
-    const { AirportClient} = useContext(HttpAgent);
+const MyAirport = () => {
+
+    const { AirportClient,isAdmin} = useContext(HttpAgent);
     const [dataSource, setDataSource] = useState([]);
-    
     useEffect(()=>{
             findMyAirport(1,Constants.PageSize);
     },[])
@@ -139,15 +139,25 @@ const MyAirport = (props) => {
             }
         })
     }
-    //TODO
-    const handleDelete = (key) => {
-        const newData = dataSource.filter((item) => item.key !== key);
+    const handleDelete =async (item) => {
+        const resp = await AirportClient.DeleteAirport(item.id);
+        if(!resp||!resp.status){
+            toast.error('删除'+item.name+'空投失败');
+           return;
+      }
+        const newData = dataSource.filter((data) => data.key !== item.key);
         setDataSource(newData);
+        toast.success('删除'+item.name+'空投');
     };
-    //TODO
-    const handleComplete = (key) => {
-        const newData = dataSource.filter((item) => item.key !== key);
-        setDataSource(newData);
+    const finishAirport = async (item)=>{
+        const resp =await AirportClient.FinishAirport(item.id);
+        if(!resp||!resp.status){
+            toast.error("结束"+item.name+"空投失败");
+           return;
+      }
+      const newData = dataSource.filter((value) => value.key !== item.key);
+      setDataSource(newData);
+      toast.info(item.name+"已结束");
     }
     const handleTodayFinish =async (item)=>{
         const resp = await AirportClient.UpdateAirportByUpdateTime(item.key);
@@ -358,7 +368,7 @@ const MyAirport = (props) => {
             dataIndex: 'operation',
             align: "center",
             onCell: (record) => {
-                if (record.status === AirportStatus.Expire|| record.status === AirportStatus.SuccessObtain|| record.status === AirportStatus.UnStart) {
+                if (!isAdmin&&(record.status === AirportStatus.Expire|| record.status === AirportStatus.SuccessObtain|| record.status === AirportStatus.UnStart)) {
                     return {colSpan: 0};
                 }
                 return {
@@ -391,23 +401,46 @@ const MyAirport = (props) => {
                                                                        onClick={() => handleObtainAirport(record)}>
                             <a>领取</a>
                         </motion.button>}
+                        {isAdmin &&
+                            <motion.button whileHover={{scale: 1.1}}
+                                           whileTap={{scale: 0.9}}
+                                           transition={{type: "spring", stiffness: 400, damping: 10}}
+                                           className={"motion-button  px-1"} title="结束空投"
+                                           style={{width: "80px", height: "40px"}}
+                                           key={record.key}
+                                           onClick={() => finishAirport(record)}>
+                                <a>结束空投</a>
+                            </motion.button>}
+                        {isAdmin &&
+                            <motion.button whileHover={{scale: 1.1}}
+                                           whileTap={{scale: 0.9}}
+                                           transition={{type: "spring", stiffness: 400, damping: 10}}
+                                           className={"motion-button  px-1"} title="删除空投"
+                                           style={{width: "80px", height: "40px"}}
+                                           key={record.key}
+                                           onClick={() => handleDelete(record)}>
+                                <a>删除空投</a>
+                            </motion.button>}
                     </>
                 )
         },
     ];
-    const handleAdd = () => {
 
-        setDataSource([...dataSource, newData]);
-    };
-    const handleSave = (row) => {
+    const handleSave =async (row) => {
         const newData = [...dataSource];
         const index = newData.findIndex((item) => row.key === item.key);
         const item = newData[index];
+       const resp =await AirportClient.UpdateAirport(item);
+       if(!resp||!resp.status){
+        toast.error("修改"+item.name+"空投失败");
+             return;
+        }
         newData.splice(index, 1, {
             ...item,
             ...row,
         });
         setDataSource(newData);
+        toast.success("修改"+item.name+"信息成功");
     };
     const components = {
         body: {

@@ -1,11 +1,13 @@
 package controller
 
 import (
+	"blog/middleware/whitepaper"
 	"blog/service"
 	"blog/utils"
-	"github.com/golang-jwt/jwt"
 	"net/http"
 	"time"
+
+	"github.com/golang-jwt/jwt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
@@ -53,8 +55,15 @@ func (u *user) LoginHandler(c *gin.Context) {
 		c.JSON(200, utils.NewFailedResponse("签名出错"))
 		return
 	}
+	var ok bool
+	ok, err = whitepaper.ExistInWhitePaper(c, address)
+	if err != nil {
+		c.JSON(200, utils.NewFailedResponse("系统出错"))
+		return
+	}
 	claims := &utils.JwtCustomClaims{
 		Address: address,
+		IsAdmin: ok,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(1 * time.Hour).Unix(),
 		},
@@ -71,5 +80,11 @@ func (u *user) LoginHandler(c *gin.Context) {
 		c.JSON(200, utils.NewFailedResponse("登陆失败"))
 		return
 	}
-	c.JSON(http.StatusOK, utils.NewSuccessResponse(auth))
+	c.JSON(http.StatusOK, utils.NewSuccessResponse(&struct {
+		Auth    string `json:"auth"`
+		IsAdmin bool   `json:"is_admin"`
+	}{
+		Auth:    auth,
+		IsAdmin: ok,
+	}))
 }

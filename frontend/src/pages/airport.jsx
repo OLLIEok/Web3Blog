@@ -1,16 +1,16 @@
 import {Header, RunningAirport, FinishAirport, MyAirport} from "../components";
 import {AnimatePresence, motion} from "framer-motion";
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import "../css/airport.css";
 import {ClockCircleFilled, PlusSquareFilled, WalletFilled} from "@ant-design/icons";
+import { HttpAgent } from "../agent/agent";
 
 
 const AirPort = () => {
-    const [isAdmin, setIsAdmin] = useState(true);
     const [tabs,setTabs] = useState( [
-        {icon:<WalletFilled height={10} width={10}/>,label:"我的空投",content: <MyAirport isAdmin={isAdmin}/>},
-        {icon:<PlusSquareFilled  height={10} width={10}/>, label: "发现空投",content:<RunningAirport isAdmin={isAdmin}/>},
-        {icon: <ClockCircleFilled  height={10} width={10} />, label: "已结束的空投",content:<FinishAirport isAdmin={isAdmin}/>},
+        {icon:<WalletFilled height={10} width={10}/>,label:"我的空投",content: <MyAirport />},
+        {icon:<PlusSquareFilled  height={10} width={10}/>, label: "发现空投",content:<RunningAirport />},
+        {icon: <ClockCircleFilled  height={10} width={10} />, label: "已结束的空投",content:<FinishAirport />},
     ]);
     const [selectedTab, setSelectedTab] = useState(tabs[0]);
     return (

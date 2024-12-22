@@ -95,9 +95,8 @@ const EditableCell = ({
     }
     return <td {...restProps}>{childNode}</td>;
 };
-const FinishAirport = (props) => {
-    const { isAdmin } = props;
-    const { AirportClient} = useContext(HttpAgent);
+const FinishAirport = () => {
+    const { AirportClient,isAdmin} = useContext(HttpAgent);
     const [dataSource, setDataSource] = useState(null);
     useEffect(()=>{
             findFinishAirportByPage(1,Constants.PageSize)

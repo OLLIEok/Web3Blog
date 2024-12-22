@@ -116,13 +116,12 @@ const ObtainAirportStatus =(item)=>{
     return item 
 }
 
-const RunningAirport = (props) => {
-    const {isAdmin} = props;
+const RunningAirport = () => {
     const [dataSource, setDataSource] = useState(null);
     const [form] = Form.useForm();
     const variant = Form.useWatch('variant', form);
     const [openCreate,setOpenCreate] = useState(false);
-    const { AirportClient} = useContext(HttpAgent);
+    const { AirportClient,isAdmin} = useContext(HttpAgent);
     useEffect(() => {
             findRunningAirport(1,Constants.PageSize);
     }, [])
@@ -149,7 +148,6 @@ const RunningAirport = (props) => {
         const newDatasource = [...dataSource,item];
         setDataSource(newDatasource);
     }
-    //TODO
     const handleDelete =async (item) => {
         const resp = await AirportClient.DeleteAirport(item.id);
         if(!resp||!resp.status){
@@ -180,11 +178,7 @@ const RunningAirport = (props) => {
       setDataSource(newData);
       toast.info(item.name+"已结束");
     }
-    //TODO
-    const handleComplete = (item) => {
-        const newData = dataSource.filter((item) => item.key !== key);
-        setDataSource(newData);
-    }
+
     const defaultColumns = [
         {
             title: "状态",
@@ -399,7 +393,7 @@ const RunningAirport = (props) => {
         rules={[
           {
             required: true,
-            message: 'Please input!',
+            message: '请选择该空投的赛道',
           },
         ]}
       >
@@ -483,7 +477,7 @@ const RunningAirport = (props) => {
        <RangePicker />
       </Form.Item>
       <Form.Item
-        label="空投领取结束时间"
+        label="空投领取截止时间"
         name="final_time"
         rules={[
           {

@@ -17,10 +17,7 @@ const Header = () => {
     const {
         searchWalletModal,
         setSearchWalletModal,
-        selectedWallet,
-        setSelectedWallet,
         userAccount,
-        setUserAccount
     } = useContext(Web3Wallet);
     const { ArticleClient} = useContext(HttpAgent);
     const labelColorList = ["blue", "purple", "cyan", "green", "magenta", "pink", "red", "orange", "yellow", "volcano", "geekblue", "lime", "gold"];

@@ -27,6 +27,7 @@ func NewVerifyMiddleware() func(*gin.Context) {
 			return
 		}
 		ctx.Set("address", claims.Address)
+		ctx.Set("is_admin", claims.IsAdmin)
 		ctx.Next()
 	}
 }
