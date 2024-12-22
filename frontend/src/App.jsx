@@ -1,11 +1,9 @@
 import './App.css';
-import {HashRouter as Router, Route, Routes} from 'react-router-dom';
-import {AboutPage, ArticlePage, CreatePage, HomePage, HotDetails, NewDetails, SearchPage, TagDetails} from "./pages";
 import {Bounce, ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Airport from "./pages/airport";
 import React, {createContext, useState} from "react";
 import {DiscoverWalletProviders} from "./components/WalletProviders";
+import Agent from './agent/agent';
 export const Web3Wallet = createContext();
 export default function App() {
   const [selectedWallet, setSelectedWallet] = useState();
@@ -15,24 +13,11 @@ export default function App() {
     return (
         <>
           <Web3Wallet.Provider value={{searchWalletModal,setSearchWalletModal,selectedWallet,setSelectedWallet,userAccount,setUserAccount}}>
-              <DiscoverWalletProviders  searchWalletModal={searchWalletModal} setSearchWalletModal={setSearchWalletModal} setSelectedWallet={setSelectedWallet} setUserAccount={setUserAccount}/>
-              <Router>
-                <Routes>
-                    <Route path={'/'} Component={HomePage}/>
-                    <Route path={'/about'} Component={AboutPage}/>
-                    <Route path={'/article/create'} Component={CreatePage}/>
-                    <Route path={'/article/:articleId'} Component={ArticlePage}/>
-                    <Route path={'/search'} Component={SearchPage}/>
-                    <Route path={"/article/hot"} Component={HotDetails}/>
-                    <Route path={'/article/newest'} Component={NewDetails}/>
-                    <Route path={"/articles/tag"} Component={TagDetails}/>
-                    <Route path={"/airport"} Component={Airport}/>
-                </Routes>
-            </Router>
+            <Agent setSearchWalletModal={setSearchWalletModal}/>
           </Web3Wallet.Provider>
             <ToastContainer
                 position="top-center"
-                autoClose={5000}
+                autoClose={2000}
                 hideProgressBar={false}
                 newestOnTop={false}
                 closeOnClick

@@ -1,13 +1,14 @@
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 
 import Constants from "../util/constants";
 import {useNavigate} from "react-router-dom";
-import {TagClient, ArticleClient} from "../agent/agent";
 import {toast} from 'react-toastify';
 import {Tag, BackTop} from "antd";
 import {Header} from "../components";
+import { HttpAgent } from "../agent/agent";
 
 const HomePage = () => {
+    const {TagClient, ArticleClient} = useContext(HttpAgent);
     const defaultTagsViewNum = 12;
     const navigate = useNavigate();
     const labelColorList = ["blue", "purple", "cyan", "green", "magenta", "pink", "red", "orange", "yellow", "volcano", "geekblue", "lime", "gold"];

@@ -4,15 +4,14 @@ import {Search} from './search';
 import {AutoComplete, Divider, List, Modal, Skeleton, Tag} from 'antd';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Constants from '../util/constants';
-import {ArticleClient} from '../agent/agent';
 import {toast} from 'react-toastify';
 import {MenuToggle} from './menutoggle';
 import {useMenuAnimation} from '../hooks/menuanimation';
 import "../css/header.css"
 import {Web3Wallet} from "../App";
 import {motion} from "framer-motion";
-import {formatAddress} from "../util/web3.js";
 import Avatar from "./avatar.jsx";
+import { HttpAgent } from '../agent/agent.jsx';
 
 const Header = () => {
     const {
@@ -23,6 +22,7 @@ const Header = () => {
         userAccount,
         setUserAccount
     } = useContext(Web3Wallet);
+    const { ArticleClient} = useContext(HttpAgent);
     const labelColorList = ["blue", "purple", "cyan", "green", "magenta", "pink", "red", "orange", "yellow", "volcano", "geekblue", "lime", "gold"];
     //是否需要更换header显示
     const [changeHeader, setChangeHeader] = useState(false);

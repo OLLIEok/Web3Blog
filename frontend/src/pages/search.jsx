@@ -1,12 +1,13 @@
-import React, {useEffect, useState} from 'react';
-import {ArticleClient} from "../agent/agent";
+import React, {useEffect, useState,useContext} from 'react';
 import Constants from "../util/constants";
 import {useNavigate, useSearchParams} from "react-router-dom";
 import {Header, Spin} from '../components';
 import {ToastContainer, toast} from 'react-toastify';
 import {Tag, Empty} from 'antd';
+import { HttpAgent } from '../agent/agent';
 
 const SearchPage = () => {
+    const { ArticleClient} = useContext(HttpAgent);
     const [params] = useSearchParams()
     const navigate = useNavigate();
     const labelColorList = ["blue", "purple", "cyan", "green", "magenta", "pink", "red", "orange", "yellow", "volcano", "geekblue", "lime", "gold"];

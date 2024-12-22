@@ -1,12 +1,13 @@
-import React, {useEffect, useState} from 'react';
-import {TagClient} from "../agent/agent";
+import React, {useEffect, useState,useContext} from 'react';
 import Constants from "../util/constants";
 import {useNavigate, useSearchParams} from "react-router-dom";
 import {Header, Spin} from '../components';
 import {ToastContainer, toast} from 'react-toastify';
 import {Pagination, Empty, Tag, BackTop} from 'antd';
+import { HttpAgent } from '../agent/agent';
 
 const TagDetails = () => {
+    const { TagClient} = useContext(HttpAgent);
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const tag = searchParams.get("tag");

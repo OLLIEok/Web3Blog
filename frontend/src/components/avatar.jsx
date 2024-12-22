@@ -2,11 +2,12 @@ import {useContext, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {formatAddress} from "../util/web3";
 import {Web3Wallet} from "../App.jsx";
-import {SetAuthorizetion} from "../agent/agent.js";
+import { HttpAgent } from "../agent/agent.jsx";
 
 const Avatar = () => {
     const {selectedWallet,setSelectedWallet,userAccount,setUserAccount} = useContext(Web3Wallet);
     const [dropdown, setDropDown] = useState(false);
+    const {SetAuthorizetion} =  useContext(HttpAgent);
     const navigate = useNavigate();
     return (
         <>
@@ -15,7 +16,7 @@ const Avatar = () => {
                     <button onClick={() => {
                         setDropDown(origin => setDropDown(!origin))
                     }} type="button"
-                            className="relative inline-flex items-center justify-center w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
+                            className="relative inline-flex items-center justify-center w-12 h-12  overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600">
                         <span className="font-medium text-gray-600 dark:text-gray-300">Web3</span>
                     </button>
                     {dropdown ? <div id="dropdownInformation"
@@ -31,20 +32,20 @@ const Avatar = () => {
                                 <a onClick={() => {
                                     navigate("/article/create")
                                 }}
-                                   className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">创建文章</a>
+                                   className="block px-4 py-2 lg:text-md text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">创建文章</a>
                             </li>
                             <li>
                                 <a href="#"
-                                   className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Dashboard</a>
+                                   className="block px-4 py-2 lg:text-md text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Dashboard</a>
                             </li>
                             <li>
                                 <a href="#"
-                                   className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Collection</a>
+                                   className="block px-4 py-2 lg:text-md text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Collection</a>
                             </li>
                         </ul>
                         <div className="py-2">
                             <a href="#"
-                               className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                               className="block px-4 py-2 text-sm lg:text-md text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
                                onClick={() => {
                                     setSelectedWallet(null);
                                     setUserAccount(null);

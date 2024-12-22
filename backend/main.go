@@ -58,6 +58,9 @@ func bindAirportRoutes(engine *gin.Engine) {
 	route.GET("/findfinish", jwt.NewVerifyMiddleware(), func(ctx *gin.Context) {
 		controller.GetAirport().FindFinishAirport(ctx)
 	})
+	route.GET("/findmy", jwt.NewVerifyMiddleware(), func(ctx *gin.Context) {
+		controller.GetAirport().FindMyAirport(ctx)
+	})
 	route.POST("/create", jwt.NewVerifyMiddleware(), whitepaper.WhitepaperMiddleware(), func(ctx *gin.Context) {
 		controller.GetAirport().CreateAirport(ctx)
 	})
@@ -66,6 +69,9 @@ func bindAirportRoutes(engine *gin.Engine) {
 	})
 	route.GET("/update", jwt.NewVerifyMiddleware(), func(context *gin.Context) {
 		controller.GetAirport().UpdateAirport(context)
+	})
+	route.POST("update", jwt.NewVerifyMiddleware(), whitepaper.WhitepaperMiddleware(), func(ctx *gin.Context) {
+		controller.GetAirport().UpdateAirportInfo(ctx)
 	})
 }
 

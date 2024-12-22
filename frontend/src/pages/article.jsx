@@ -2,7 +2,6 @@ import React, {useContext, useEffect, useState} from "react";
 import {CustomerComment, Header} from "../components";
 import {useParams} from "react-router-dom";
 import MarkdownContext from "../components/markdown";
-import {LikeClient, ArticleClient, CommentClient, Authorization} from "../agent/agent";
 import {Tag, Modal, Input, InputNumber, Segmented, Button, BackTop, Avatar, Tooltip} from "antd";
 import {Comment} from "@ant-design/compatible";
 import {toast} from "react-toastify";
@@ -11,7 +10,9 @@ import {UserOutlined, MoneyCollectOutlined} from "@ant-design/icons";
 import { motion, useScroll } from "framer-motion";
 import {Web3Wallet} from "../App";
 import "../css/progressbar.css";
+import { HttpAgent } from "../agent/agent";
 const ArticlePage = () => {
+    const {LikeClient, ArticleClient, CommentClient, Authorization} = useContext(HttpAgent);
     const {userAccount,searchWalletModal,setSearchWalletModal} = useContext(Web3Wallet);
     //文章唯一id
     const {articleId} = useParams();

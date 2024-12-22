@@ -1,12 +1,13 @@
 
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import {Skeleton, Form, Input, Progress, Table, InputNumber, Tag, Tooltip, Statistic} from 'antd';
+import {Skeleton, Form, Input, Progress, Table, InputNumber, Tag, Tooltip, Statistic, Button,DatePicker, Modal} from 'antd';
 import { motion } from 'framer-motion';
-import {ExclamationCircleOutlined, InfoCircleOutlined} from "@ant-design/icons";
+import {ClockCircleOutlined, InfoCircleOutlined} from "@ant-design/icons";
 import {Star} from "./index.js";
-import { AirportClient } from '../agent/agent.js';
 import Constants from '../util/constants.js';
 import { toast } from 'react-toastify';
+import { HttpAgent } from '../agent/agent.jsx';
+import { AirportStatus } from '../util/airport.js';
 const EditableContext = React.createContext(null);
 const EditableRow = ({ index, ...props }) => {
     const [form] = Form.useForm();
@@ -18,6 +19,16 @@ const EditableRow = ({ index, ...props }) => {
         </Form>
     );
 };
+const { RangePicker } = DatePicker;
+const  ObtainAirportStatus =(item)=>{
+    const final_time =new Date(item.final_time).getTime();
+    const now = Date.now();
+    if(!final_time&&final_time>now){
+        item.status =AirportStatus.Obtaining;
+    }else{
+        item.status =AirportStatus.Finish;
+    }
+}
 const EditableCell = ({
     title,
     editable,
@@ -86,23 +97,32 @@ const EditableCell = ({
 };
 const FinishAirport = (props) => {
     const { isAdmin } = props;
+    const { AirportClient} = useContext(HttpAgent);
     const [dataSource, setDataSource] = useState(null);
     useEffect(()=>{
             findFinishAirportByPage(1,Constants.PageSize)
     },[])
     const findFinishAirportByPage = (page,pagesize)=>{
         AirportClient.FindFinishAirport(page,pagesize).then((data)=>{
-            if (data === undefined || data === null) {
+            if (data === undefined || data === null||!data.status) {
+                toast.error("查询失败");
                 return;
             }
-
-            setDataSource(data);
+            
+            if (data.data){
+            setDataSource(data.data.map((item)=>{item.key=item.id;return ObtainAirportStatus(item)}));
+            }
         })
     }
-    //TODO
-    const handleDelete = (key) => {
-        const newData = dataSource.filter((item) => item.key !== key);
+    const handleDelete =async (item) => {
+        const resp = await AirportClient.DeleteAirport(item.id);
+        if(!resp||!resp.status){
+            toast.error('删除'+item.name+'空投失败');
+           return;
+      }
+        const newData = dataSource.filter((data) => item.key !== data.key);
         setDataSource(newData);
+        toast.success('删除'+item.name+'空投');
     };
     //TODO
     const handleComplete = (key) => {
@@ -111,16 +131,41 @@ const FinishAirport = (props) => {
     }
     const defaultColumns = [
         {
-            title: '进度',
-            align:"center",
+            title: "状态",
+            align: "center",
+            dataIndex: "status",
             render: (_, record) => {
-                let end = new Date(record.end_time);
-                let final = new Date(record.final_time);
+                switch (record.status) {
+                    case AirportStatus.Obtaining:
+                        return (
+                            <Tag icon={<SyncOutlined spin/>} color="processing">
+                                领取中
+                            </Tag>
+                        )
+                    case AirportStatus.Finish:
+                        return (
+                            <Tag icon={<ClockCircleOutlined />} color="default">
+                                已结束
+                            </Tag>
+                        )
+                }
+            }
+        },
+        {
+            title: '进度',
+            align: "center",
+            render: (_, record) => {
+                let end = new Date(record.end_time).getTime();
+                let final = new Date(record.final_time).getTime();
                 let now = Date.now();
-                let p = Math.floor((now - end) / (final - end) * 100);
-                p = Math.min(p, 100);
+                let finish_p =Math.floor((now - end)/(final -end )*100)
                 return (
-                    <Progress format={(percent)=>`领取进度: ${percent}%`} percent={p} percentPosition={{ align: 'center', type: 'outer' }} size={[100, 30]}/>
+                    record.status === AirportStatus.Finish?<Skeleton paragraph={{
+                        rows: 1,
+                    }} active />:<Progress
+                        format={(percent) => `领取中: ${percent}%`}
+                        percent={finish_p} percentPosition={{align: 'center', type: 'outer'}} size={[100, 30]}/>
+                    
                 );
             }
         },
@@ -251,7 +296,7 @@ const FinishAirport = (props) => {
                             className={"motion-button  px-1"} title="删除空投"
                             style={{ width: "80px", height: "40px" }}
                             key={record.key}
-                            onClick={() => handleDelete(record.key)}>
+                            onClick={() => handleDelete(record)}>
                             <a>删除空投</a>
                         </motion.button>
 
@@ -259,10 +304,6 @@ const FinishAirport = (props) => {
                 ) : null,
         },
     ];
-    const handleAdd = () => {
-
-        setDataSource([...dataSource, newData]);
-    };
     const handleSave = (row) => {
         const newData = [...dataSource];
         const index = newData.findIndex((item) => row.key === item.key);

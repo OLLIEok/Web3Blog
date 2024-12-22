@@ -1,6 +1,6 @@
-import {useCallback, useState} from "react";
+import {useCallback, useState,useContext} from "react";
 
-import {CommentClient} from "../agent/agent";
+import { HttpAgent} from "../agent/agent";
 import "../css/comment.css";
 import {toast} from "react-toastify";
 import {Button} from "antd";
@@ -10,6 +10,7 @@ const CustomerComment = ({topID, articleId, callBack, setIsOpen}) => {
         articleid: Number(articleId),
         topid: topID,
     };
+    const { CommentClient} = useContext(HttpAgent);
     const [content, setContent] = useState("");
     const createComment = useCallback(() => {
             CommentClient.CreateComment({...parentInfo, content: content}).then((res) => {

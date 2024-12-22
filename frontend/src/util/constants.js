@@ -1,5 +1,5 @@
 const Constants = {
-    PageSize: 15
+    PageSize: 25
 
 }
 

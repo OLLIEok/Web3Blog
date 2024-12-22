@@ -1,0 +1,145 @@
+import superagentPromise from 'superagent-promise';
+import _superagent from 'superagent';
+import { toast } from "react-toastify";
+import { createContext, useState } from 'react';
+import { HashRouter as Router, Route, Routes } from 'react-router-dom';
+import { AboutPage, AirPort, ArticlePage, CreatePage, HomePage, HotDetails, NewDetails, SearchPage, TagDetails } from "../pages";
+import { DiscoverWalletProviders } from '../components/WalletProviders';
+const superagent = superagentPromise(_superagent, Promise);
+
+const localStorageKey = 'blog-auth-token';
+// const API_ROOT ="https://www.0xdoomxy.top/blog";
+const API_ROOT = "http://localhost:8080"
+
+// const SetAuthorizetion = (token) =>{
+//     superagent('Authorization',`Bearer ${token}`);
+// }
+export const HttpAgent = createContext();
+
+export default function Agent({setSearchWalletModal}) {
+    const responseBody = (res) => {
+        return res.body;
+    }
+    const tokenPlugin = req => {
+        if (Authorization) {
+            req.set('Authorization', `Bearer ${Authorization}`);
+        }
+    }
+
+    const [Authorization, setAuth] = useState(localStorage.getItem(localStorageKey));
+    const encode = encodeURIComponent;
+
+    const SetAuthorization = (token) => {
+        setAuth(token);
+        if (token) {
+            localStorage.setItem(localStorageKey, token);
+        } else {
+            localStorage.removeItem(localStorageKey);
+        }
+    }
+    const requests = {
+        del: url =>
+            superagent.del(`${API_ROOT}${url}`).use(tokenPlugin).then(responseBody).catch((res) => {
+                if (res.status === 401) {
+                    SetAuthorization(null);
+                    setSearchWalletModal(true);
+                    toast.error("请先登录");
+                    return;
+                }
+                toast.error("系统出错啦");
+            }),
+        get: (url) =>
+            superagent.get(`${API_ROOT}${url}`).use(tokenPlugin).then(responseBody).catch((res) => {
+                if (res.status === 401) {
+                    SetAuthorization(null);
+                    setSearchWalletModal(true);
+                    toast.error("请先登录");
+                    return;
+                }
+                toast.error("系统出错啦");
+            }),
+        put: (url, body) =>
+            superagent.put(`${API_ROOT}${url}`, body).use(tokenPlugin).then(responseBody).catch((res) => {
+                if (res.status === 401) {
+                    SetAuthorization(null);
+                    setSearchWalletModal(true);
+                    toast.error("请先登录");
+                    return;
+                }
+                toast.error("系统出错啦");
+            }),
+        post: (url, body) =>
+            superagent.post(`${API_ROOT}${url}`, body).use(tokenPlugin).then(responseBody).catch((res) => {
+                if (res.status === 401) {
+                    SetAuthorization(null);
+                    setSearchWalletModal(true);
+                    toast.error("请先登录");
+                    return;
+                }
+                toast.error("系统出错啦");
+            }),
+    };
+
+    const TagClient = {
+        GetAllTags: () => requests.get(`/tag/findall`),
+        GetArticleByTag: (tag, page, pagesize) => requests.get(`/tag/findArticle?tag=${encode(tag)}&page=${encode(page)}&pagesize=${encode(pagesize)}`)
+    }
+    const CommentClient = {
+        SearchByArticle: (articleid) => requests.get(`/comment/find?articleid=${encode(articleid)}`),
+        CreateComment: (comment) => requests.post(`/comment/create`, comment),
+        DeleteComment: (id, articleid) => requests.get(`/comment/delete?articleid=${encode(articleid)}&id=${encode(id)}`)
+    }
+    const AirportClient = {
+        UpdateAirportByUpdateTime: (id) => requests.get(`/airport/update?type=${encode("user_update_time")}&id=${encode(id)}`),
+        UpdateAirportByAddressBalance: (id, balance) => requests.get(`/airport/update?type=${encode("user_address_balance")}&id=${encode(id)}&balance=${encode(balance)}`),
+        UpdateAirportByFinishTime: (id) => requests.get(`/airport/update?type=${encode("user_finish")}&id=${encode(id)}`),
+        AddAirportIntoAddress: (id) => requests.get(`/airport/update?type=${encode("user_add_into_address")}&id=${encode(id)}`),
+        UpdateAirport:(airport)=>requests.post(`/airport/update`,airport),
+        AddAirport: (airport) => requests.post(`/airport/create`, airport),
+        FinishAirport: (id) => requests.post(`/airport/update`,{id:id,end_time:new Date()}),
+        DeleteAirport: (id) => requests.get(`/airport/delete?id=${encode(id)}`),
+        FindAirportByAddress: (page, pageSize) => requests.get(`/airport/findmy?page=${encode(page)}&pagesize=${encode(pageSize)}`),
+        FindRunningAirport: (page, pageSize) => requests.get(`/airport/findrunning?page=${encode(page)}&pagesize=${encode(pageSize)}`),
+        FindFinishAirport: (page, pageSize) => requests.get(`/airport/findfinish?page=${encode(page)}&pagesize=${encode(pageSize)}`)
+    }
+    const ArticleClient = {
+        ImageDownload: (file) => requests.get(`/article/image/download?filename=${encode(file)}`),
+        ImageUpload: (file) => requests.post(`/article/image/upload`, file),
+        ImageDownloadUrl: (filename) => `/blog/article/image/download?filename=${encode(filename)}`,
+        Publish: (article) => requests.post(`/article/publish`, article),
+        Find: (articleId) => requests.get(`/article/find?id=${encode(articleId)}`),
+        FindMaxAccess: (page, pagesize) => requests.get(`/article/findbymaxaccess?page=${encode(page)}&pagesize=${encode(pagesize)}`),
+        FindNewest: (page, pagesize) => requests.get(`/article/findbycreatetime?page=${encode(page)}&pagesize=${encode(pagesize)}`),
+        Search: (keyword, page, pagesize) => requests.get(`/article/search?page=${encode(page)}&pagesize=${encode(pagesize)}&keyword=${encode(keyword)}`)
+    }
+
+    const LikeClient = {
+        Add: (articleId, userid) => requests.get(`/like/confirm?articleid=${encode(articleId)}&userid=${encode(userid)}`),
+        Remove: (articleId, userid) => requests.get(`/like/cancel?articleid=${encode(articleId)}&userid=${encode(userid)}`),
+        Find: (articleId, userid) => requests.get(`/like/exist?articleid=${encode(articleId)}&userid=${encode(userid)}`)
+
+    }
+
+    const UserClient = {
+        Login: (signs) => requests.post(`/user/login`, signs)
+    }
+    return (
+        <HttpAgent.Provider value={{ AirportClient, CommentClient, Authorization, SetAuthorization, UserClient, LikeClient, ArticleClient, TagClient, API_ROOT }}>
+            
+            <DiscoverWalletProviders />
+            <Router>
+                <Routes>
+                    <Route path={'/'} Component={HomePage} />
+                    <Route path={'/about'} Component={AboutPage} />
+                    <Route path={'/article/create'} Component={CreatePage} />
+                    <Route path={'/article/:articleId'} Component={ArticlePage} />
+                    <Route path={'/search'} Component={SearchPage} />
+                    <Route path={"/article/hot"} Component={HotDetails} />
+                    <Route path={'/article/newest'} Component={NewDetails} />
+                    <Route path={"/articles/tag"} Component={TagDetails} />
+                    <Route path={"/airport"} Component={AirPort} />
+                </Routes>
+            </Router>
+        </HttpAgent.Provider>
+    )
+}

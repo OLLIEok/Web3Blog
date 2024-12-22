@@ -1,10 +1,13 @@
 import React, {useContext, useEffect, useRef, useState} from 'react';
 import {Form, Input, Progress, Skeleton, Statistic, Table, Tag, Tooltip} from 'antd';
 import {motion} from 'framer-motion';
-import {CheckCircleOutlined, ExclamationCircleOutlined, InfoCircleOutlined, SyncOutlined} from "@ant-design/icons";
+import {CheckCircleOutlined, ExclamationCircleOutlined,MinusCircleOutlined, ClockCircleOutlined ,InfoCircleOutlined, SyncOutlined} from "@ant-design/icons";
 import {Star} from "./index.js";
 import {isToday} from "../util/date.js";
 import { toast } from 'react-toastify';
+import Constants from '../util/constants.js';
+import { AirportStatus } from '../util/airport.js';
+import { HttpAgent } from '../agent/agent.jsx';
 
 const EditableContext = React.createContext(null);
 const EditableRow = ({index, ...props}) => {
@@ -17,6 +20,40 @@ const EditableRow = ({index, ...props}) => {
         </Form>
     );
 };
+
+const ObtainAirportStatus = (item)=>{
+    const now = Date.now();
+    const airport_start_time = new Date(item.start_time).getTime();
+    if (airport_start_time>now){
+        item.status = AirportStatus.UnStart;
+    }else if(!item.end_time ){
+        if (!item.user_update_time){
+            item.status= AirportStatus.UnFinishToday;
+        }else{
+        const airport_user_update_time =new Date(item.user_update_time).getTime();
+        if (!isToday(airport_user_update_time)){
+            item.status= AirportStatus.UnFinishToday;
+        }else{
+            item.status = AirportStatus.Running;
+        }
+    }
+    }else {
+        const airport_end_time = new Date(item.end_time).getTime();
+        let airport_user_finish_time =now;
+        if (item.user_finish_time){
+            airport_user_finish_time = new Date(item.user_finish_time).getTime();
+        }
+            if (airport_end_time<airport_user_finish_time){
+                    item.status =AirportStatus.Expire;
+            }else if (item.user_finish_time){
+                    item.status =AirportStatus.SuccessObtain;
+            }else{
+                item.status =AirportStatus.NeedToObtain;
+            }
+        
+    }
+    return item;
+}
 const EditableCell = ({
                           title,
                           editable,
@@ -84,69 +121,23 @@ const EditableCell = ({
     return <td {...restProps}>{childNode}</td>;
 };
 const MyAirport = (props) => {
-    const {isAdmin} = props;
-    const [dataSource, setDataSource] = useState([
-        {
-            key: '0',
-            name: 'Edward King 0',
-            start_time: Date.now() - 1000 * 1000 * 60 * 24,
-            end_time: Date.now() - 500 * 1000 * 60 * 24,
-            final_time: Date.now() + 2000 * 1000 * 60 * 24,
-            address: "www.baidu.com",
-            tag: "区块链,AI",
-            financing_balance: "3000$",
-            financing_from: "a16z,binance",
-            task_type: "拉人头,交互",
-            balance: 1000,
-            status: "SUCCESS"
-        },
-        {
-            key: '1',
-            name: 'Edward King 0',
-            start_time: Date.now() - 1000 * 60 * 24,
-            end_time: Date.now() - 250 * 1000 * 60 * 24,
-            final_time: Date.now() + 2000 * 1000 * 60 * 24,
-            address: "www.baidu.com",
-            tag: "区块链,AI",
-            financing_balance: "3000$",
-            financing_from: "a16z,binance",
-            task_type: "拉人头,交互",
-            status: "PROCESSING",
-            update_time: Date.now() - 250 * 1000 * 60 * 24
-            // balance: 1000
-        },
-        {
-            key: '1',
-            name: 'Edward King 0',
-            start_time: Date.now() - 1000 * 60 * 24,
-            end_time: Date.now() - 250 * 1000 * 60 * 24,
-            final_time: Date.now() + 2000 * 1000 * 60 * 24,
-            address: "www.baidu.com",
-            tag: "区块链,AI",
-            financing_balance: "3000$",
-            financing_from: "a16z,binance",
-            task_type: "拉人头,交互",
-            status: "PROCESSING",
-            update_time: Date.now() -  1000 * 60 * 24
-            // balance: 1000
-        },
-        {
-            key: '2',
-            name: 'Edward King 0',
-            start_time: Date.now() - 1000 * 60 * 24,
-            end_time: Date.now() - 250 * 1000 * 60 * 24,
-            final_time: Date.now() + 2000 * 1000 * 60 * 24,
-            address: "www.baidu.com",
-            tag: "区块链,AI",
-            financing_balance: "3000$",
-            financing_from: "a16z,binance",
-            task_type: "拉人头,交互",
-            status: "UNCHECK"
-            // balance: 1000
-        },
-    ]);
-    const findDataByPage = (page,pageSize)=>{
+    const { AirportClient} = useContext(HttpAgent);
+    const [dataSource, setDataSource] = useState([]);
+    
+    useEffect(()=>{
+            findMyAirport(1,Constants.PageSize);
+    },[])
+    const findMyAirport = (page, pageSize) => {
+        AirportClient.FindAirportByAddress(page, pageSize).then((data) => {
 
+            if (!data||!data.status){
+                toast.error("查询失败");
+                return;
+            }
+            if(data.data){
+            setDataSource(data.data.map((item)=>{item.key=item.id;return ObtainAirportStatus(item)}));
+            }
+        })
     }
     //TODO
     const handleDelete = (key) => {
@@ -158,21 +149,37 @@ const MyAirport = (props) => {
         const newData = dataSource.filter((item) => item.key !== key);
         setDataSource(newData);
     }
-    //TODO
-    const handleTodayFinish =(key)=>{
-        const updateItem = undefined;
-        dataSource.forEach((item)=>{
-            if (item.key === key){
-                updateItem = item;
-            }
-        });
-        if (updateItem === null){
-            toast.error("删除数据为空");
+    const handleTodayFinish =async (item)=>{
+        const resp = await AirportClient.UpdateAirportByUpdateTime(item.key);
+         if (!resp || !resp.status){
+            toast.error("系统出错");
             return;
         }
 
-        const newData = dataSource.filter((item) => item.key !== key);
+        const newData =dataSource.filter((data) => {
+            if (item.key === data.key){
+                data.user_update_time  =resp.data;
+            }
+            return true;
+        });
         setDataSource(newData);
+        toast.success("完成"+item.name+"今日的空投任务");
+    }
+    const handleObtainAirport=async (item)=>{
+        const resp = await AirportClient.UpdateAirportByFinishTime(item.id);
+        if (!resp || !resp.status){
+            toast.error("领取失败");
+            return;
+        }
+        const newData =dataSource.filter((data) => {
+            if (data.key == item.key){
+            item.status= "SUCCESS";
+            }
+            return true
+             }
+            );
+        setDataSource(newData);
+        toast.success("领取空投"+item.name+"成功")
     }
     const defaultColumns = [
         {
@@ -181,22 +188,34 @@ const MyAirport = (props) => {
             dataIndex: "status",
             render: (_, record) => {
                 switch (record.status) {
-                    case 'SUCCESS':
+                    case AirportStatus.SuccessObtain:
                         return (
                             <Tag icon={<CheckCircleOutlined/>} color="success">
                                 空投领取
                             </Tag>
                         )
-                    case 'PROCESSING':
+                    case AirportStatus.Running || AirportStatus.UnFinishToday:
                         return (
                             <Tag icon={<SyncOutlined spin/>} color="processing">
                                 进行中
                             </Tag>
                         )
-                    case 'UNCHECK':
+                    case AirportStatus.NeedToObtain:
                         return (
                             <Tag icon={<ExclamationCircleOutlined/>} color="warning">
                                 待领取
+                            </Tag>
+                        )
+                    case AirportStatus.Expire:
+                        return (
+                            <Tag icon={<MinusCircleOutlined />} color="default">
+                                已过期
+                            </Tag>
+                        )
+                    case AirportStatus.UnStart:
+                        return (
+                            <Tag icon={<ClockCircleOutlined />} color="default">
+                                未开始
                             </Tag>
                         )
                 }
@@ -206,27 +225,30 @@ const MyAirport = (props) => {
             title: '进度',
             align: "center",
             render: (_, record) => {
-                let end = record.end_time;
-                let final = record.final_time;
+                let start = new Date(record.start_time).getTime();
+                let end = new Date(record.end_time).getTime();
+                let final = new Date(record.final_time).getTime();
                 let now = Date.now();
-                let p = Math.floor((now - end) / (final - end) * 100);
+                let running_p = Math.floor((now - start) / (end - start) * 100);
+                let finish_p =Math.floor((now - end)/(final -end )*100)
                 return (
-                    <Progress
-                        format={(percent) => `${record.status === "PROCESSING" ? "空投进度:" : "领取进度:"} ${percent}%`}
-                        percent={p} percentPosition={{align: 'center', type: 'outer'}} size={[100, 30]}/>
+                    record.status === AirportStatus.UnStart||record.status === AirportStatus.Expire?<Skeleton paragraph={{
+                        rows: 1,
+                    }} active />:<Progress
+                        format={(percent) => `${record.status === AirportStatus.Running||record.status === AirportStatus.UnFinishToday ? "空投进度:" : "领取进度:"} ${percent}%`}
+                        percent={record.status === AirportStatus.Running||record.status === AirportStatus.UnFinishToday?running_p:finish_p} percentPosition={{align: 'center', type: 'outer'}} size={[100, 30]}/>
+                    
                 );
             }
         },
         {
             title: '项目名',
             dataIndex: 'name',
-            editable: true,
             align: "center",
         },
         {
             title: '官网地址',
             dataIndex: 'address',
-            editable: true,
             align: "center",
             render: (_, record) => {
                 return <a href={record.address}>官网地址</a>
@@ -235,7 +257,6 @@ const MyAirport = (props) => {
         {
             title: '赛道',
             dataIndex: 'tag',
-            editable: true,
             align: "center",
             render: (_, record) => {
                 return <div className={"flex  justify-center items-center"}>
@@ -256,13 +277,11 @@ const MyAirport = (props) => {
         {
             title: '融资金额',
             dataIndex: 'financing_balance',
-            editable: true,
             align: "center",
         },
         {
             title: '融资来源方',
             dataIndex: 'financing_from',
-            editable: true,
             align: "center",
             render: (_, record) => {
                 return <div className={"flex  justify-center items-center"}>
@@ -280,7 +299,6 @@ const MyAirport = (props) => {
         {
             title: '教程',
             dataIndex: 'teaching',
-            editable: true,
             align: "center",
             render: (_, record) => {
                 return <a href={record.teaching}>教程链接</a>
@@ -301,7 +319,6 @@ const MyAirport = (props) => {
         {
             title: '任务类型',
             dataIndex: 'task_type',
-            editable: true,
             align: "center",
             render: (_, record) => {
                 return <div className={"flex  justify-center items-center"}>
@@ -321,15 +338,14 @@ const MyAirport = (props) => {
                             title={"平台用户获取该空投的总数量"}>空投数量<InfoCircleOutlined
                 className={"relative  bottom-3 left-2"}/></Tooltip>,
             dataIndex: "balance",
-            editable: true,
             align: "center",
-            render: (_, record) => (record.status === "SUCCESS"&&record.balance)? (
+            render: (_, record) => (record.status === AirportStatus.SuccessObtain)? (
                 <Statistic  value={record.balance}/>
             ):<Skeleton paragraph={{
             rows: 1,
         }} active />,
             onCell: (item) => {
-                if (item.status === "SUCCESS") {
+                if (item.status === AirportStatus.SuccessObtain) {
                     return {colSpan: 2};
                 } else {
                     return {colSpan: 0};
@@ -342,13 +358,8 @@ const MyAirport = (props) => {
             dataIndex: 'operation',
             align: "center",
             onCell: (record) => {
-                if (record.status === "SUCCESS") {
+                if (record.status === AirportStatus.Expire|| record.status === AirportStatus.SuccessObtain|| record.status === AirportStatus.UnStart) {
                     return {colSpan: 0};
-                }
-                if (record.status === "PROCESSING" && isToday(record.update_time)){
-                    return {
-                        colSpan: 0,
-                    }
                 }
                 return {
                     colSpan:2,
@@ -356,18 +367,18 @@ const MyAirport = (props) => {
             },
             render: (_, record) =>
                 dataSource.length >= 1 && (<>{
-                        record.status === "PROCESSING" && !isToday(record.update_time) &&
+                        record.stauts === AirportStatus.UnFinishToday &&
                         <motion.button whileHover={{scale: 1.1}}
                                        whileTap={{scale: 0.9}}
                                        transition={{type: "spring", stiffness: 400, damping: 10}}
                                        className={"motion-button  px-1"} title="完成任务"
                                        style={{width: "80px", height: "40px" ,background:"#b7eb8f"}}
                                        key={record.key}
-                                       onClick={() => handleComplete(record.key)}>
+                                       onClick={() => handleTodayFinish(record)}>
                             <a>今日完成</a>
                         </motion.button>
                     }
-                        {record.status === "UNCHECK" && <motion.button whileHover={{scale: 1.1}}
+                        {record.status === AirportStatus.NeedToObtain && <motion.button whileHover={{scale: 1.1}}
                                                                        whileTap={{scale: 0.9}}
                                                                        transition={{
                                                                            type: "spring",
@@ -377,7 +388,7 @@ const MyAirport = (props) => {
                                                                        className={"motion-button  px-1"} title="领取空投"
                                                                        style={{width: "80px", height: "40px",background:"#faad14"}}
                                                                        key={record.key}
-                                                                       onClick={() => handleComplete(record.key)}>
+                                                                       onClick={() => handleObtainAirport(record)}>
                             <a>领取</a>
                         </motion.button>}
                     </>

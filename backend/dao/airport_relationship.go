@@ -6,8 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/redis/go-redis/v9"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 
 	"github.com/sirupsen/logrus"
 	"golang.org/x/sync/singleflight"
@@ -41,7 +42,7 @@ func newAirportRelationshipDao() *airportRelationship {
 func (ar *airportRelationship) UpdateAirportRelationship(ctx context.Context, data *model.AirportRelationship) (err error) {
 	cache := db.GetRedis()
 	err = cache.Del(ctx, fmt.Sprintf("airport_relationship_%d_%s", data.AirportId, data.UserAddress)).Err()
-	if err != nil {
+	if err != nil && !errors.Is(err, redis.Nil) {
 		logrus.Panicf("delete airport_relationship cache (%v) when update airport_relationship err:%s", data, err.Error())
 		return
 	}
@@ -71,7 +72,7 @@ func (ar *airportRelationship) CreateAirportRelationship(ctx context.Context, da
 func (ar *airportRelationship) DeleteAirportRelationship(ctx context.Context, data *model.AirportRelationship) (err error) {
 	cache := db.GetRedis()
 	err = cache.Del(ctx, fmt.Sprintf("airport_relationship_%d_%s", data.AirportId, data.UserAddress)).Err()
-	if err != nil {
+	if err != nil && !errors.Is(err, redis.Nil) {
 		logrus.Errorf("delete airport_relationship(%v) in redis err:%s", data, err.Error())
 		return
 	}

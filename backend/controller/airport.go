@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"blog/dao"
 	"blog/model"
 	"blog/service"
 	"blog/utils"
@@ -37,7 +38,7 @@ func (a *airport) FindFinishAirport(c *gin.Context) {
 		c.JSON(200, utils.NewFailedResponse("查询失败"))
 		return
 	}
-	c.JSON(200, res)
+	c.JSON(200, utils.NewSuccessResponse(res))
 }
 
 func (a *airport) FindRunningAirport(c *gin.Context) {
@@ -70,7 +71,7 @@ func (a *airport) FindRunningAirport(c *gin.Context) {
 		c.JSON(200, utils.NewFailedResponse("查询失败"))
 		return
 	}
-	c.JSON(200, res)
+	c.JSON(200, utils.NewSuccessResponse(res))
 }
 func (a *airport) DeleteAirport(c *gin.Context) {
 
@@ -84,7 +85,7 @@ func (a *airport) DeleteAirport(c *gin.Context) {
 		c.JSON(200, utils.NewFailedResponse("删除失败"))
 		return
 	}
-	return
+	c.JSON(200, utils.NewSuccessResponse("删除成功"))
 }
 func (a *airport) CreateAirport(c *gin.Context) {
 	var airport = new(model.Airport)
@@ -112,11 +113,35 @@ func (a *airport) CreateAirport(c *gin.Context) {
 		c.JSON(200, utils.NewFailedResponse("参数出错"))
 		return
 	}
+	if airport.FinalTime.Before(*airport.EndTime) {
+		c.JSON(200, utils.NewFailedResponse("参数出错"))
+		return
+	}
+	if airport.EndTime.Before(airport.StartTime) {
+		c.JSON(200, utils.NewFailedResponse("参数出错"))
+		return
+	}
 	err = service.GetAirport().CreateAirport(c, airport)
 	if err != nil {
 		c.JSON(200, utils.NewFailedResponse("创建失败"))
 		return
 	}
+	c.JSON(200, utils.NewSuccessResponse("创建成功"))
+}
+func (a *airport) UpdateAirportInfo(c *gin.Context) {
+	var data = new(model.Airport)
+	err := c.Bind(data)
+	if err != nil {
+		c.JSON(200, utils.NewFailedResponse("参数出错"))
+		return
+	}
+	var res any
+	res, err = service.GetAirport().UpdateAirportInfo(c, data)
+	if err != nil {
+		c.JSON(200, utils.NewFailedResponse("修改失败"))
+		return
+	}
+	c.JSON(200, utils.NewSuccessResponse(res))
 }
 
 func (a *airport) UpdateAirport(c *gin.Context) {
@@ -145,7 +170,10 @@ func (a *airport) UpdateAirport(c *gin.Context) {
 		return
 	}
 	params := &service.UpdateAirportTemplate{
-		Schema:              updateType,
+		Schema: updateType,
+		Airport: &model.Airport{
+			ID: uint(airportId),
+		},
 		AirportRelationship: &model.AirportRelationship{AirportId: uint(airportId), UserAddress: address},
 	}
 	var balance float64
@@ -158,12 +186,44 @@ func (a *airport) UpdateAirport(c *gin.Context) {
 		}
 		params.AirportRelationship.Balance = balance
 	}
-	err = service.GetAirport().UpdateAirport(c, params)
+	var res any
+	res, err = service.GetAirport().UpdateAirport(c, params)
 	if err != nil {
-		if err != nil {
-			c.JSON(200, utils.NewFailedResponse("修改失败"))
-			return
-		}
+		c.JSON(200, utils.NewFailedResponse("修改失败"))
+		return
 	}
-	return
+	c.JSON(200, utils.NewSuccessResponse(res))
+}
+
+func (a *airport) FindMyAirport(c *gin.Context) {
+	var ok bool
+	var addressAny any
+	addressAny, ok = c.Get("address")
+	if !ok {
+		c.JSON(200, utils.NewFailedResponse("参数出错"))
+		return
+	}
+	var address string
+	if address, ok = addressAny.(string); !ok {
+		c.JSON(200, utils.NewFailedResponse("参数出错"))
+		return
+	}
+	page, err := strconv.ParseInt(c.Query("page"), 10, 64)
+	if err != nil || page <= 0 {
+		c.JSON(200, utils.NewFailedResponse("参数出错"))
+		return
+	}
+	var pagesize int64
+	pagesize, err = strconv.ParseInt(c.Query("pagesize"), 10, 64)
+	if err != nil || pagesize <= 0 {
+		c.JSON(200, utils.NewFailedResponse("参数出错"))
+		return
+	}
+	var res []*dao.MyAirportView
+	res, err = service.GetAirport().QueryMyAirportByPage(c, address, int(page), int(pagesize))
+	if err != nil {
+		c.JSON(200, utils.NewFailedResponse("查询出错"))
+		return
+	}
+	c.JSON(200, utils.NewSuccessResponse(res))
 }

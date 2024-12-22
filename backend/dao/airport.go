@@ -7,9 +7,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
-	"time"
 
 	"github.com/sirupsen/logrus"
 	"golang.org/x/sync/singleflight"
@@ -51,7 +52,7 @@ func (a *airport) CreateAirport(ctx context.Context, data *model.Airport) (err e
 func (a *airport) DeleteAirport(ctx context.Context, airportId uint) (err error) {
 	cache := db.GetRedis()
 	err = cache.Del(ctx, fmt.Sprintf("airport_%d", airportId)).Err()
-	if err != nil {
+	if err != nil && !errors.Is(err, redis.Nil) {
 		logrus.Errorf("delete airport %d   in redis  error:%s", airportId, err.Error())
 		return
 	}
@@ -114,14 +115,14 @@ func (a *airport) QueryRunningAirportWithWeightByPage(ctx context.Context, addre
 		a.weight AS weight
 	FROM
 		airport AS a 
-	LEFT JOIN 
+	left JOIN 
 		airport_relationship AS ar
 	ON 	
 		ar.user_address = ? AND
-		a.final_time is null AND
+		a.end_time > now() AND
 		a.id=ar.airport_id
-		AND ar.airport_id IS not  NULL 
-	ORDER BY a.weight
+	where ar.airport_id IS   NULL 
+	ORDER BY a.weight desc
 	LIMIT ?  offset ?`, address, pageSize, (page-1)*pageSize).Rows()
 		if closureErr != nil {
 			return closureRes, closureErr
@@ -153,7 +154,7 @@ func (a *airport) QueryFinishAirportWithFinishTimeByPage(ctx context.Context, pa
 	raw, err, _ = a.sf.Do(fmt.Sprintf("finish_%d_%d", page, pagesize), func() (interface{}, error) {
 		var closureRes []*model.Airport
 		var closureErr error
-		closureErr = storage.WithContext(ctx).Model(&model.Airport{}).Where("final_time is not null").Limit(pagesize).Offset((page - 1) * pagesize).Order("final_time desc").Find(&res).Error
+		closureErr = storage.WithContext(ctx).Model(&model.Airport{}).Where("end_time is not null and end_time <= NOW()").Limit(pagesize).Offset((page - 1) * pagesize).Order("final_time desc").Find(&closureRes).Error
 		return closureRes, closureErr
 	})
 	if err != nil {
@@ -163,6 +164,11 @@ func (a *airport) QueryFinishAirportWithFinishTimeByPage(ctx context.Context, pa
 	return raw.([]*model.Airport), err
 }
 func (a *airport) UpdateAirport(ctx context.Context, data *model.Airport) (err error) {
+	cache := db.GetRedis()
+	err = cache.Del(ctx, fmt.Sprintf("airport_%d", data.ID)).Err()
+	if err != nil && !errors.Is(err, redis.Nil) {
+		return
+	}
 	storage := db.GetMysql()
 	return storage.WithContext(ctx).Updates(data).Error
 }
@@ -180,7 +186,7 @@ func (a *airport) QueryMyAirportWithUpdateByPage(ctx context.Context, address st
 	raw, err, _ = a.sf.Do(fmt.Sprintf("my_%s_%d_%d", address, page, pageSize), func() (interface{}, error) {
 		var closureRes []*MyAirportView
 		var closureErr error
-		closureErr = storage.WithContext(ctx).Model(&model.Airport{}).Select("airport.*,ar.balance as user_balance,ar.update_time as user_update_time,ar.finish_time as user_finish_time").Joins("left join airport_relationship as ar on ar.delete_time is null and airport.id = ar.airport_id ").Offset((page - 1) * pageSize).Limit(pageSize).Order("ar.update_time").Find(&closureRes).Error
+		closureErr = storage.WithContext(ctx).Model(&model.Airport{}).Select("airport.*,ar.balance as user_balance,ar.update_time as user_update_time,ar.finish_time as user_finish_time").Joins("left join airport_relationship as ar on ar.delete_time is null and airport.id = ar.airport_id ").Where("ar.airport_id is not null").Offset((page - 1) * pageSize).Limit(pageSize).Order("ar.update_time,ar.finish_time").Find(&closureRes).Error
 		return closureRes, closureErr
 	})
 	if err != nil {
