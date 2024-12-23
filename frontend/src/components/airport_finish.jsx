@@ -1,6 +1,6 @@
 
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import {Skeleton, Form, Input, Progress, Table, InputNumber, Tag, Tooltip, Statistic, Button,DatePicker, Modal} from 'antd';
+import {Skeleton, Form, Input, Progress, Table, Tag, Tooltip, Statistic,DatePicker} from 'antd';
 import { motion } from 'framer-motion';
 import {ClockCircleOutlined, InfoCircleOutlined} from "@ant-design/icons";
 import {Star} from "./index.js";
@@ -28,6 +28,7 @@ const  ObtainAirportStatus =(item)=>{
     }else{
         item.status =AirportStatus.Finish;
     }
+    return item;
 }
 const EditableCell = ({
     title,
@@ -101,17 +102,16 @@ const FinishAirport = () => {
     useEffect(()=>{
             findFinishAirportByPage(1,Constants.PageSize)
     },[])
-    const findFinishAirportByPage = (page,pagesize)=>{
-        AirportClient.FindFinishAirport(page,pagesize).then((data)=>{
-            if (data === undefined || data === null||!data.status) {
-                toast.error("查询失败");
-                return;
-            }
-            
-            if (data.data){
-            setDataSource(data.data.map((item)=>{item.key=item.id;return ObtainAirportStatus(item)}));
-            }
-        })
+    const findFinishAirportByPage = async (page,pagesize)=>{
+       const resp = await AirportClient.FindFinishAirport(page,pagesize);
+       console.log(resp);
+       if(!resp||!resp.status){
+            toast.error('查询空投失败');
+            return;
+        }
+    if (resp.data){
+        setDataSource(resp.data.map((item)=>{item.key=item.id;return ObtainAirportStatus(item)}));
+    }
     }
     const handleDelete =async (item) => {
         const resp = await AirportClient.DeleteAirport(item.id);
@@ -123,11 +123,6 @@ const FinishAirport = () => {
         setDataSource(newData);
         toast.success('删除'+item.name+'空投');
     };
-    //TODO
-    const handleComplete = (key) => {
-        const newData = dataSource.filter((item) => item.key !== key);
-        setDataSource(newData);
-    }
     const defaultColumns = [
         {
             title: "状态",
@@ -171,13 +166,13 @@ const FinishAirport = () => {
         {
             title: '项目名',
             dataIndex: 'name',
-            editable: true,
+            editable: isAdmin,
             align:"center",
         },
         {
             title: '官网地址',
             dataIndex: 'address',
-            editable: true,
+            editable: isAdmin,
             align:"center",
             render: (_, record) => {
                 return <a href={record.address}>官网地址</a>
@@ -186,7 +181,7 @@ const FinishAirport = () => {
         {
             title: '赛道',
             dataIndex: 'tag',
-            editable: true,
+            editable: isAdmin,
             align:"center",
             render:(_,record)=>{
                 return   <div className={"flex  justify-center items-center"}>
@@ -207,13 +202,16 @@ const FinishAirport = () => {
         {
             title: '融资金额',
             dataIndex: 'financing_balance',
-            editable: true,
+            editable: isAdmin,
             align:"center",
+            render:(_,item)=>{
+                return  <Statistic  value={item.financing_balance} />
+              }
         },
         {
             title: '融资来源方',
             dataIndex: 'financing_from',
-            editable: true,
+            editable: isAdmin,
             align:"center",
             render:(_,record)=>{
                 return   <div className={"flex  justify-center items-center"}>
@@ -231,7 +229,7 @@ const FinishAirport = () => {
         {
             title: '教程',
             dataIndex: 'teaching',
-            editable: true,
+            editable: isAdmin,
             align:"center",
             render: (_, record) => {
                 return <a href={record.teaching}>教程链接</a>
@@ -240,7 +238,7 @@ const FinishAirport = () => {
         {
             title: '任务类型',
             dataIndex: 'task_type',
-            editable: true,
+            editable: isAdmin,
             align:"center",
             render:(_,record)=>{
                 return   <div className={"flex  justify-center items-center"}>
@@ -259,6 +257,7 @@ const FinishAirport = () => {
             title:<Tooltip placement={"rightTop"} color={"rgba(116,112,112,0.88)"} title={"该空投在平台收集的空投中的评分"}>空投质量<InfoCircleOutlined  className={"relative  bottom-3 left-2"}/></Tooltip>,
             dataIndex: 'weight',
             align:"center",
+            editable: isAdmin,
             render:(_,record)=>{
                 return (
                     <Star number={record.weight}/>

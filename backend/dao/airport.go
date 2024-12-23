@@ -118,10 +118,8 @@ func (a *airport) QueryRunningAirportWithWeightByPage(ctx context.Context, addre
 	left JOIN 
 		airport_relationship AS ar
 	ON 	
-		ar.user_address = ? AND
-		a.end_time > now() AND
 		a.id=ar.airport_id
-	where ar.airport_id IS   NULL 
+	where (ar.airport_id IS   NULL OR ar.user_address != ?) and a.end_time > NOW() 
 	ORDER BY a.weight desc
 	LIMIT ?  offset ?`, address, pageSize, (page-1)*pageSize).Rows()
 		if closureErr != nil {

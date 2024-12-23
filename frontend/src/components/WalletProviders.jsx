@@ -16,7 +16,7 @@ export const DiscoverWalletProviders = () => {
         infuraAPIKey: "656103da5ad94eea9d35c65f78079af8",
     })
     const { SetAuthorization, UserClient,SetIsAdmin } = useContext(HttpAgent);
-    const { searchWalletModal, setSearchWalletModal, selectedWallet, setSelectedWallet, setUserAccount } = useContext(Web3Wallet);
+    const { searchWalletModal, setSearchWalletModal, setSelectedWallet, setUserAccount } = useContext(Web3Wallet);
     const providers = useSyncProviders()
     const handleConnectAndSign = async (providerWithInfo, account) => {
 
@@ -95,7 +95,6 @@ export const DiscoverWalletProviders = () => {
                 if (!loginResp || !loginResp.status) {
                     return false;
                 }
-                console.log(loginResp.data);
                 SetAuthorization(loginResp.data.auth);
                 SetIsAdmin(loginResp.data.is_admin);
                 return true;

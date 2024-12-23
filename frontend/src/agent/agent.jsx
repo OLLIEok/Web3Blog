@@ -1,7 +1,7 @@
 import superagentPromise from 'superagent-promise';
 import _superagent from 'superagent';
 import { toast } from "react-toastify";
-import { createContext, useState } from 'react';
+import { createContext, useState,useEffect } from 'react';
 import { HashRouter as Router, Route, Routes } from 'react-router-dom';
 import { AboutPage, AirPort, ArticlePage, CreatePage, HomePage, HotDetails, NewDetails, SearchPage, TagDetails } from "../pages";
 import { DiscoverWalletProviders } from '../components/WalletProviders';
@@ -16,7 +16,7 @@ const API_ROOT = "http://localhost:8080"
 // }
 export const HttpAgent = createContext();
 
-export default function Agent({setSearchWalletModal}) {
+export default function Agent({setSearchWalletModal,selectedWallet,userAccount}) {
     const responseBody = (res) => {
         return res.body;
     }
@@ -25,10 +25,10 @@ export default function Agent({setSearchWalletModal}) {
             req.set('Authorization', `Bearer ${Authorization}`);
         }
     }
+
     const [isAdmin,setIsAdmin] = useState(false);
     const [Authorization, setAuth] = useState(localStorage.getItem(localStorageKey));
     const encode = encodeURIComponent;
-
     const SetAuthorization = (token) => {
         setAuth(token);
         if (token) {
@@ -45,6 +45,7 @@ export default function Agent({setSearchWalletModal}) {
             superagent.del(`${API_ROOT}${url}`).use(tokenPlugin).then(responseBody).catch((res) => {
                 if (res.status === 401) {
                     SetAuthorization(null);
+                    setIsAdmin(false);
                     setSearchWalletModal(true);
                     toast.error("请先登录");
                     return;
@@ -55,6 +56,7 @@ export default function Agent({setSearchWalletModal}) {
             superagent.get(`${API_ROOT}${url}`).use(tokenPlugin).then(responseBody).catch((res) => {
                 if (res.status === 401) {
                     SetAuthorization(null);
+                    setIsAdmin(false);
                     setSearchWalletModal(true);
                     toast.error("请先登录");
                     return;
@@ -65,6 +67,7 @@ export default function Agent({setSearchWalletModal}) {
             superagent.put(`${API_ROOT}${url}`, body).use(tokenPlugin).then(responseBody).catch((res) => {
                 if (res.status === 401) {
                     SetAuthorization(null);
+                    setIsAdmin(false);
                     setSearchWalletModal(true);
                     toast.error("请先登录");
                     return;
@@ -76,6 +79,7 @@ export default function Agent({setSearchWalletModal}) {
                 if (res.status === 401) {
                     SetAuthorization(null);
                     setSearchWalletModal(true);
+                    setIsAdmin(false);
                     toast.error("请先登录");
                     return;
                 }

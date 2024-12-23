@@ -12,18 +12,17 @@ export default function App() {
     return (
         <>
           <Web3Wallet.Provider value={{searchWalletModal,setSearchWalletModal,selectedWallet,setSelectedWallet,userAccount,setUserAccount}}>
-            <Agent setSearchWalletModal={setSearchWalletModal}/>
+            <Agent userAccount={userAccount} searchWalletModal={searchWalletModal}  setSearchWalletModal={setSearchWalletModal}/>
           </Web3Wallet.Provider>
             <ToastContainer
                 position="top-center"
-                autoClose={2000}
+                autoClose={1000}
                 hideProgressBar={false}
                 newestOnTop={false}
                 closeOnClick
                 rtl={false}
                 pauseOnFocusLoss
                 draggable
-                limit={1}
                 pauseOnHover
                 theme="light"
                 transition={Bounce}

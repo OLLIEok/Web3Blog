@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from 'react';
-import {Form, Input, Modal, Progress, Table,Tooltip,Tag,DatePicker,Select,InputNumber, Mentions} from 'antd';
-import {ClockCircleFilled, ClockCircleOutlined, InfoCircleOutlined,SyncOutlined } from '@ant-design/icons';
+import {Form, Input, Modal, Progress, Table,Tooltip,Tag,DatePicker,Select,InputNumber,Statistic, Mentions} from 'antd';
+import { ClockCircleOutlined, InfoCircleOutlined,SyncOutlined } from '@ant-design/icons';
 import {motion} from 'framer-motion';
 import { HttpAgent} from '../agent/agent';
 import {toast} from "react-toastify";
@@ -122,7 +122,8 @@ const RunningAirport = () => {
     const variant = Form.useWatch('variant', form);
     const [openCreate,setOpenCreate] = useState(false);
     const { AirportClient,isAdmin} = useContext(HttpAgent);
-    useEffect(() => {
+    
+    useEffect(() => {      
             findRunningAirport(1,Constants.PageSize);
     }, [])
     const findRunningAirport = (page, pageSize) => {
@@ -137,15 +138,23 @@ const RunningAirport = () => {
         })
     }
     const addNewAirport = async (item)=>{
-        item.start_time = item.airport_time[0];
-        item.end_time = item.airport_time[1];
+        item.start_time = new Date(new Date(item.airport_time[0]).getTime()+ (8 * 60 * 60 * 1000));
+        item.end_time = new Date(new Date(item.airport_time[1]).getTime()+ (8 * 60 * 60 * 1000));
+        item.final_time = new Date(new Date(item.final_time).getTime()+ (8 * 60 * 60 * 1000));
+        item.task_type = item.task_type.replace(/@/g, "");
+        item.tag = item.tag.replace(/@/g, "");
+        item.financing_from = item.financing_from.replace(/@/g, "");
+        item.task_type = item.task_type.replace(/ /g, ",");
+        item.tag = item.tag.replace(/ /g, ",");
+        item.financing_from = item.financing_from.replace(/ /g, ",");
         const resp = await AirportClient.AddAirport(item);
-        if (!data||!data.status){
+        if (!resp||!resp.status){
             toast.error("创建失败");
             return;
         }
         toast.success("创建"+item.name+"成功")
-        const newDatasource = [...dataSource,item];
+        item = ObtainAirportStatus(item);
+         const newDatasource = Array.isArray(dataSource) ? [...dataSource, item] : [item];
         setDataSource(newDatasource);
         setOpenCreate(!openCreate);
     }
@@ -231,17 +240,47 @@ const RunningAirport = () => {
             title: '赛道',
             dataIndex: 'tag',
             editable: isAdmin,
+            render: (_, record) => {
+              return <div className={"flex  justify-center items-center"}>
+                  {record.tag.split(',').map((tag) => {
+                      let color = tag.length > 5 ? 'geekblue' : 'green';
+                      if (tag === 'loser') {
+                          color = 'volcano';
+                      }
+                      return (
+                          <Tag color={color} key={tag}>
+                              {tag.toUpperCase()}
+                          </Tag>
+                      );
+                  })}
+              </div>
+          }
         },
         {
             title: '融资金额',
             dataIndex: 'financing_balance',
             editable: isAdmin,
+            render:(_,item)=>{
+              return  <Statistic  value={item.financing_balance} />
+            }
         },
         {
-            title: '融资来源方',
-            dataIndex: 'financing_from',
-            editable: isAdmin,
-        },
+          title: '融资来源方',
+          dataIndex: 'financing_from',
+          align: "center",
+          render: (_, record) => {
+              return <div className={"flex  justify-center items-center"}>
+                  {record.financing_from.split(',').map((tag) => {
+                      let color = tag.length > 5 ? 'geekblue' : 'volcano';
+                      return (
+                          <Tag color={color} key={tag}>
+                              {tag.toUpperCase()}
+                          </Tag>
+                      );
+                  })}
+              </div>
+          }
+      },
         {
             title: '教程',
             dataIndex: 'teaching',
@@ -253,7 +292,19 @@ const RunningAirport = () => {
         {
             title: '任务类型',
             dataIndex: 'task_type',
-            editable: isAdmin
+            editable: isAdmin,
+            render: (_, record) => {
+              return <div className={"flex  justify-center items-center"}>
+                  {record.task_type.split(',').map((tag) => {
+                      let color = tag.length > 5 ? 'magenta' : 'purple';
+                      return (
+                          <Tag color={color} key={tag}>
+                              {tag.toUpperCase()}
+                          </Tag>
+                      );
+                  })}
+              </div>
+          }
         },
         {
             title: <Tooltip placement={"rightTop"} color={"rgba(116,112,112,0.88)"}
@@ -346,7 +397,7 @@ const RunningAirport = () => {
         };
     });
     return (<>
-           <Modal onClose={()=>{setOpenCreate(!openCreate)}} open={openCreate} closable={false} footer={null}>
+           <Modal onClose={()=>{setOpenCreate(!openCreate)}} open={openCreate} onCancel={()=>setOpenCreate(!openCreate)} footer={null}>
             <Form
       {...formItemLayout}
       form={form}
@@ -398,7 +449,7 @@ const RunningAirport = () => {
           },
         ]}
       >
-        <Mentions split={','} />
+        <Mentions split={","} />
       </Form.Item>
       <Form.Item
         label="融资金额"
@@ -413,7 +464,7 @@ const RunningAirport = () => {
         rules={[
           {
             required: true,
-            message: 'Please input!',
+            message: '请输入项目投资方',
           },
         ]}
       >

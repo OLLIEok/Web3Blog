@@ -7,11 +7,11 @@ import { HttpAgent } from "../agent/agent.jsx";
 const Avatar = () => {
     const {selectedWallet,setSelectedWallet,userAccount,setUserAccount} = useContext(Web3Wallet);
     const [dropdown, setDropDown] = useState(false);
-    const {SetAuthorizetion,SetIsAdmin} =  useContext(HttpAgent);
+    const {SetAuthorizetion,SetIsAdmin,Authorization} =  useContext(HttpAgent);
     const navigate = useNavigate();
     return (
         <>
-            {(userAccount !== undefined && userAccount !== null) ?
+            {(Authorization !== undefined && Authorization !== null) ?
                 <>
                     <button onClick={() => {
                         setDropDown(origin => setDropDown(!origin))

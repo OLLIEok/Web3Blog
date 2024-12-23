@@ -24,9 +24,10 @@ const EditableRow = ({index, ...props}) => {
 const ObtainAirportStatus = (item)=>{
     const now = Date.now();
     const airport_start_time = new Date(item.start_time).getTime();
+    const airport_end_time = new Date(item.end_time).getTime();
     if (airport_start_time>now){
         item.status = AirportStatus.UnStart;
-    }else if(!item.end_time ){
+    }else if(!airport_end_time || now < airport_end_time ){
         if (!item.user_update_time){
             item.status= AirportStatus.UnFinishToday;
         }else{
@@ -38,7 +39,7 @@ const ObtainAirportStatus = (item)=>{
         }
     }
     }else {
-        const airport_end_time = new Date(item.end_time).getTime();
+    
         let airport_user_finish_time =now;
         if (item.user_finish_time){
             airport_user_finish_time = new Date(item.user_finish_time).getTime();
@@ -204,7 +205,13 @@ const MyAirport = () => {
                                 空投领取
                             </Tag>
                         )
-                    case AirportStatus.Running || AirportStatus.UnFinishToday:
+                    case AirportStatus.Running:
+                        return (
+                            <Tag icon={<SyncOutlined spin/>} color="processing">
+                                进行中
+                            </Tag>
+                        )
+                    case AirportStatus.UnFinishToday:
                         return (
                             <Tag icon={<SyncOutlined spin/>} color="processing">
                                 进行中
@@ -240,7 +247,10 @@ const MyAirport = () => {
                 let final = new Date(record.final_time).getTime();
                 let now = Date.now();
                 let running_p = Math.floor((now - start) / (end - start) * 100);
-                let finish_p =Math.floor((now - end)/(final -end )*100)
+                let finish_p =100;
+                if (final!=end){
+                    finish_p =Math.floor((now - end)/(final -end )*100);
+                }
                 return (
                     record.status === AirportStatus.UnStart||record.status === AirportStatus.Expire?<Skeleton paragraph={{
                         rows: 1,
@@ -288,6 +298,9 @@ const MyAirport = () => {
             title: '融资金额',
             dataIndex: 'financing_balance',
             align: "center",
+            render:(_,item)=>{
+                return  <Statistic  value={item.financing_balance} />
+              }
         },
         {
             title: '融资来源方',
@@ -346,7 +359,7 @@ const MyAirport = () => {
         {
             title: <Tooltip placement={"rightTop"} color={"rgba(116,112,112,0.88)"}
                             title={"平台用户获取该空投的总数量"}>空投数量<InfoCircleOutlined
-                className={"relative  bottom-3 left-2"}/></Tooltip>,
+                className={"relative  bottom-2 left-1"}/></Tooltip>,
             dataIndex: "balance",
             align: "center",
             render: (_, record) => (record.status === AirportStatus.SuccessObtain)? (
