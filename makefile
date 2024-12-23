@@ -25,7 +25,7 @@ build_backend:
 
 
 build_frontend:
-	cd $(FRONTEND_DIR) && npm install && npm run build
+	cd $(FRONTEND_DIR) && npm config set registry https://registry.npmmirror.com && npm install && npm run build
 
 
 up_docker_compose:
