@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://ethereum.org/en/">
-      <img alt="TON logo" src="https://github.com/0xdoomxy/blog/blob/main/images/favicon.svg">
+      <img alt="Ethereum logo" src="https://github.com/0xdoomxy/blog/blob/main/images/favicon.png">
   </a>
   <h3>Web3 Technical Article Sharing Platform</h3>
   <hr/>
