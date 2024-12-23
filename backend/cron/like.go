@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/robfig/cron/v3"
 	"github.com/sirupsen/logrus"
@@ -29,6 +30,7 @@ func (lcc *likeConsumerCron) Run() {
 	var m = make(map[uint64]uint64)
 	onceExec <- struct{}{}
 	lcc.internal.AddJob("*/2 * * * *", cron.FuncJob(func() {
+		logrus.Infof("%v 开始执行like任务", time.Now())
 		if len(onceExec) < 1 {
 			return
 		}

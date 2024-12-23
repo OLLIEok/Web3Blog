@@ -7,7 +7,7 @@ import (
 
 /*评论表*/
 type Comment struct {
-	ID        uint `gorm:"primaryKey;autoIncrement"`
+	ID        uint `gorm:"primarykey;autoIncrement"`
 	CreateAt  time.Time
 	TopID     uint   `gorm:"not null;index:search"`
 	Content   string `gorm:"type:varchar(255);not null"`

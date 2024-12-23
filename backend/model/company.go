@@ -1,7 +1,7 @@
 package model
 
 type Company struct {
-	Name string `gorm:"type:varchar(255);primary_key"`
+	Name string `gorm:"type:varchar(255);primarykey"`
 }
 
 func (c *Company) TableName() string {

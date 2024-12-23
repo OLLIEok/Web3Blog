@@ -147,6 +147,7 @@ const RunningAirport = () => {
         toast.success("创建"+item.name+"成功")
         const newDatasource = [...dataSource,item];
         setDataSource(newDatasource);
+        setOpenCreate(!openCreate);
     }
     const handleDelete =async (item) => {
         const resp = await AirportClient.DeleteAirport(item.id);
@@ -345,7 +346,7 @@ const RunningAirport = () => {
         };
     });
     return (<>
-           <Modal open={openCreate} closable={false} footer={null}>
+           <Modal onClose={()=>{setOpenCreate(!openCreate)}} open={openCreate} closable={false} footer={null}>
             <Form
       {...formItemLayout}
       form={form}
@@ -397,7 +398,7 @@ const RunningAirport = () => {
           },
         ]}
       >
-        <Mentions />
+        <Mentions split={','} />
       </Form.Item>
       <Form.Item
         label="融资金额"
@@ -416,7 +417,7 @@ const RunningAirport = () => {
           },
         ]}
       >
-         <Mentions/>  
+         <Mentions split={','}/>  
       </Form.Item>
       <Form.Item
         label="教程"
@@ -443,7 +444,7 @@ const RunningAirport = () => {
           },
         ]}
       >
-      <Mentions />
+      <Mentions   split={','}/>
       </Form.Item>
       <Form.Item
         label="空投质量"

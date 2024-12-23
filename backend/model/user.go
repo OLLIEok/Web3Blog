@@ -7,7 +7,7 @@ import (
 
 /*用户表*/
 type User struct {
-	Address   string `gorm:"type:varchar(64);primary_key"`
+	Address   string `gorm:"type:varchar(64);primaryKey"`
 	Alias     string `gorm:"type:varchar(255);not null"`
 	CreatedAt time.Time
 	//TODO we should pass this field to notify the user who starts up the subscribe function  the new message is arriving

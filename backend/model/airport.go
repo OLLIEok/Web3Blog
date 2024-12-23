@@ -6,7 +6,7 @@ import (
 )
 
 type Airport struct {
-	ID               uint       `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	ID               uint       `gorm:"primarykey;AUTO_INCREMENT" json:"id"`
 	Name             string     `gorm:"type:varchar(255);not null" json:"name"`
 	StartTime        time.Time  `gorm:"type:datetime;not null" json:"start_time"`
 	EndTime          *time.Time `gorm:"type:datetime" json:"end_time"`

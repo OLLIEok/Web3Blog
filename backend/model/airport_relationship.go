@@ -6,8 +6,8 @@ import (
 )
 
 type AirportRelationship struct {
-	AirportId   uint       `json:"airport_id" gorm:"primary_key"`
-	UserAddress string     `gorm:"type:varchar(255);primary_key" json:"user_address"`
+	AirportId   uint       `json:"airport_id" gorm:"primarykey"`
+	UserAddress string     `gorm:"type:varchar(255);primarykey" json:"user_address"`
 	CreateTime  time.Time  `gorm:"type:datetime;not null" json:"create_time"`
 	UpdateTime  *time.Time `gorm:"type:datetime" json:"update_time"`
 	FinishTime  *time.Time `gorm:"type:datetime" json:"finish_time"`

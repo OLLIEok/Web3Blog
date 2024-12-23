@@ -15,7 +15,7 @@ import (
 
 func StartCronTask() {
 	manager := cron.NewCronManager()
-	manager.EquipmentTask(cron.NewAccessConsumerCron(), cron.NewLikeConsumerCron())
+	manager.EquipmentTask(cron.NewAccessConsumerCron(), cron.NewLikeConsumerCron(), cron.NewAirportCron())
 	go manager.Run()
 }
 

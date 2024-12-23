@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -34,6 +35,7 @@ func (acc *accessConsumerCron) Run() {
 		logrus.Fatalf("create the rabbitmq channel failed:%s", err.Error())
 	}
 	go func() {
+		logrus.Infof("%v 开始执行access任务", time.Now())
 		var accessDao = dao.GetAccess()
 		var messages <-chan amqp.Delivery
 		messages, err = channel.Consume(viper.GetString("rabbitmq.accessqueue"), "", true, false, false, false, nil)
