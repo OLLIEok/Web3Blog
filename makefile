@@ -9,9 +9,9 @@ DEPLOYMENT_DIR =deployment
 all: build
 
 check_and_stop:
-	@if docker-compose -f $(DOCKER_COMPOSE_FILE) ps -q | grep -q .; then \
+	@if docker-compose -f deployment/$(DOCKER_COMPOSE_FILE) ps -q | grep -q .; then \
 		echo "Stopping running Docker Compose services..."; \
-		docker-compose -f $(DOCKER_COMPOSE_FILE) stop; \
+		docker-compose -f deployment/$(DOCKER_COMPOSE_FILE) stop; \
 	fi
 
 remove_docker_image:
@@ -21,7 +21,7 @@ remove_docker_image:
 	fi
 
 build_backend:
-	cd $(BACKEND_DIR) && GOOS=linux go build -ldflags="-s -w" -o blog main.go && chmod u+x blog && docker build -t ${DOCKER_IMAGE} -f .dockerfile .
+	cd $(BACKEND_DIR) && docker build -t ${DOCKER_IMAGE} -f .dockerfile .
 
 
 build_frontend:
