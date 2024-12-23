@@ -4,6 +4,9 @@ WORKDIR /app
 
 COPY . .
 
+ENV GOPROXY=https://goproxy.cn,direct
+ENV GO111MODULE=on
+
 RUN go build -o blog -ldflags="-s -w" .
 
 --
@@ -21,7 +24,7 @@ RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
     echo "Asia/Shanghai" > /etc/timezone
 
 COPY --from=builder ./blog ./blog
-
+RUN chmod u+x ./blog
 COPY --from=builder /config/*.yaml ./config/
 
 EXPOSE 8080
