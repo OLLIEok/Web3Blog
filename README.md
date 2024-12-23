@@ -1,9 +1,6 @@
 <div align="center">
-  <a href="https://ton.org">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://github.com/0xdoomxy/blog/blob/main/images/ton_logo_light_background.svg">
-      <img alt="TON logo" src="https://github.com/0xdoomxy/blog/blob/main/images/ton_logo_light_background.svg">
-    </picture>
+  <a href="https://ethereum.org/en/">
+      <img alt="TON logo" src="https://github.com/0xdoomxy/blog/blob/main/images/favicon.svg">
   </a>
   <h3>Web3 Technical Article Sharing Platform</h3>
   <hr/>
