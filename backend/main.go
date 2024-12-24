@@ -2,21 +2,24 @@ package main
 
 import (
 	"blog/controller"
-	"blog/cron"
 	"blog/middleware/cors"
 	"blog/middleware/jwt"
 	"blog/middleware/metrics"
 	"blog/middleware/whitepaper"
+	"blog/task"
 	"fmt"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 func StartCronTask() {
-	manager := cron.NewCronManager()
-	manager.EquipmentTask(cron.NewAccessConsumerCron(), cron.NewLikeConsumerCron(), cron.NewAirportCron())
-	go manager.Run()
+	manager := task.NewTaskManager()
+	err := manager.Run()
+	if err != nil {
+		logrus.Panicf("init task job manager failed:%s", err.Error())
+	}
 }
 
 func main() {

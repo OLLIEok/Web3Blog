@@ -119,7 +119,7 @@ func (a *airport) QueryRunningAirportWithWeightByPage(ctx context.Context, addre
 		airport_relationship AS ar
 	ON 	
 		a.id=ar.airport_id
-	where (ar.airport_id IS   NULL OR ar.user_address != ?) and a.end_time > NOW() 
+	where (ar.airport_id IS   NULL OR ar.user_address != ?) and (a.end_time is null or a.end_time > NOW()) 
 	ORDER BY a.weight desc
 	LIMIT ?  offset ?`, address, pageSize, (page-1)*pageSize).Rows()
 		if closureErr != nil {
@@ -152,7 +152,7 @@ func (a *airport) QueryFinishAirportWithFinishTimeByPage(ctx context.Context, pa
 	raw, err, _ = a.sf.Do(fmt.Sprintf("finish_%d_%d", page, pagesize), func() (interface{}, error) {
 		var closureRes []*model.Airport
 		var closureErr error
-		closureErr = storage.WithContext(ctx).Model(&model.Airport{}).Where("end_time is not null and end_time <= NOW()").Limit(pagesize).Offset((page - 1) * pagesize).Order("final_time desc").Find(&closureRes).Error
+		closureErr = storage.WithContext(ctx).Model(&model.Airport{}).Where("end_time <= NOW()").Limit(pagesize).Offset((page - 1) * pagesize).Order("final_time desc").Find(&closureRes).Error
 		return closureRes, closureErr
 	})
 	if err != nil {
