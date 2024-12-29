@@ -8,6 +8,7 @@ ENV GOPROXY=https://goproxy.cn,direct
 ENV GO111MODULE=on
 ENV GOOS=linux
 ENV CGO_ENABLED = 0
+ENV GIN_MODE=release
 RUN go build -o blog -ldflags="-s -w" .
 
 

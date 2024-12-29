@@ -20,6 +20,7 @@ func init() {
 	if err := rs.Ping(context.TODO()).Err(); err != nil {
 		logrus.Fatalf("redis connect failed, err:%v", err)
 	}
+	logrus.Info("redis connect success")
 }
 
 func GetRedis() *redis.Client {

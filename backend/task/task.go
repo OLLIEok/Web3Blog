@@ -37,7 +37,7 @@ func (m *manager) Run() (err error) {
 		return
 	}
 	logrus.Infof("Success  registe airport cron job :%d", airportJob)
-	m.c.Run()
+	go m.c.Run()
 	// run self task which cant be managed by cron.Cron
 	m.runSelfTask()
 

@@ -31,10 +31,9 @@ func newAccessConsumerJob(final chan chan any) func() {
 		logrus.Infof("%v 开始执行access任务", time.Now())
 		var accessDao = dao.GetAccess()
 		var messages <-chan amqp.Delivery
-		messages, err = channel.Consume(viper.GetString("rabbitmq.accessqueue"), "", true, false, false, false, nil)
+		messages, err = channel.Consume(viper.GetString("rabbitmq.accessqueue"), "access", true, false, false, false, nil)
 		if err != nil {
-			logrus.Errorf("consume the rabbitmq queue failed:%s", err.Error())
-			return
+			logrus.Fatalf("consume the rabbitmq queue failed:%s", err.Error())
 		}
 		for true {
 			select {
@@ -46,20 +45,20 @@ func newAccessConsumerJob(final chan chan any) func() {
 				raw := msg.Body
 				if len(raw) <= 0 {
 					msg.Ack(true)
-					return
+					continue
 				}
 				var access = model.Access{}
 				err = json.Unmarshal(raw, &access)
 				if err != nil {
 					msg.Ack(false)
 					logrus.Errorf("consumer unmarshal the access {%v} failed: %s", msg.Body, err.Error())
-					return
+					continue
 				}
 				err = accessDao.IncrementAccessNumToDB(context.TODO(), access)
 				if err != nil {
 					msg.Ack(false)
 					logrus.Errorf("increment the access {%v} num to db failed: %s", access, err.Error())
-					return
+					continue
 				}
 				msg.Ack(true)
 			}

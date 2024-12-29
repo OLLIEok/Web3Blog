@@ -4,6 +4,7 @@ import (
 	"blog/utils"
 	"context"
 	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
@@ -52,7 +53,7 @@ func AddWhitePaper(ctx context.Context, operator string, address ...string) (err
 	ok, err = whitepapre.delegate.SIsMember(ctx, whitepapre.key, operator).Result()
 	if err != nil || !ok {
 		if err == nil {
-			err = fmt.Errorf("%s cant be allowed to operate white paper")
+			err = fmt.Errorf("%s cant be allowed to operate white paper", operator)
 		}
 		return
 	}
@@ -65,7 +66,7 @@ func DeleteWhitePaper(ctx context.Context, operator string, address ...string) (
 	ok, err = whitepapre.delegate.SIsMember(ctx, whitepapre.key, operator).Result()
 	if err != nil || !ok {
 		if err == nil {
-			err = fmt.Errorf("%s cant be allowed to operate white paper")
+			err = fmt.Errorf("%s cant be allowed to operate white paper", operator)
 		}
 		return
 	}
