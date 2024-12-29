@@ -11,7 +11,7 @@ all: build
 check_and_stop:
 	@if docker-compose -f deployment/$(DOCKER_COMPOSE_FILE) ps -q | grep -q .; then \
 		echo "Stopping running Docker Compose services..."; \
-		docker-compose -f deployment/$(DOCKER_COMPOSE_FILE) stop; \
+		docker-compose -f deployment/$(DOCKER_COMPOSE_FILE) down; \
 	fi
 
 remove_docker_image:

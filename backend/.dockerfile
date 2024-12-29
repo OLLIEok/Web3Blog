@@ -1,4 +1,4 @@
-FROM golang:1.22.1 as builder
+FROM registry.cn-chengdu.aliyuncs.com/web3blog/golang:1.22.1 as builder
 
 WORKDIR /app
 
@@ -7,6 +7,7 @@ COPY . .
 ENV GOPROXY=https://goproxy.cn,direct
 ENV GO111MODULE=on
 ENV GOOS=linux
+ENV CGO_ENABLED = 0
 RUN go build -o blog -ldflags="-s -w" .
 
 
@@ -23,9 +24,9 @@ RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
     echo "Asia/Shanghai" > /etc/timezone
 
 COPY --from=builder /app/blog /blog
-RUN chmod u+x /blog
+RUN chmod u+x ./blog
 COPY --from=builder /app/config/*.yaml /config/
 
 EXPOSE 8080
 
-CMD ["/blog"]
+CMD ["/bin/sh","-c","./blog"]
