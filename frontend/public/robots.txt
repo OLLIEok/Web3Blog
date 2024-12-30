@@ -1,2 +1,8 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
+Allow: /
+
+Sitemap: https://www.0xdoomxy.top/sitemap.xml
+
+Disallow: /admin/
+Disallow: /private/
