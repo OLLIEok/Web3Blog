@@ -51,7 +51,14 @@ func main() {
 	bindUserRoutes(engine)
 	bindTagRoutes(engine)
 	bindAirportRoutes(engine)
+	bindMessageRoutes(engine)
 	engine.Run(":8080")
+}
+func bindMessageRoutes(engine *gin.Engine) {
+	route := engine.Group("/message")
+	route.GET("/query", jwt.NewVerifyMiddleware(), func(ctx *gin.Context) {
+		controller.GetMessage().QueryMessageByPage(ctx)
+	})
 }
 func bindAirportRoutes(engine *gin.Engine) {
 	route := engine.Group("/airport")

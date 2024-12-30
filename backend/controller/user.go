@@ -52,13 +52,13 @@ func (u *user) LoginHandler(c *gin.Context) {
 	var address string
 	address, err = utils.Ecrecover(verify.Message, verify.Signature)
 	if err != nil {
-		c.JSON(200, utils.NewFailedResponse("签名出错"))
+		c.JSON(http.StatusOK, utils.NewFailedResponse("签名出错"))
 		return
 	}
 	var ok bool
 	ok, err = whitepaper.ExistInWhitePaper(c, address)
 	if err != nil {
-		c.JSON(200, utils.NewFailedResponse("系统出错"))
+		c.JSON(http.StatusOK, utils.NewFailedResponse("系统出错"))
 		return
 	}
 	claims := &utils.JwtCustomClaims{
@@ -72,12 +72,12 @@ func (u *user) LoginHandler(c *gin.Context) {
 	var auth string
 	auth, err = token.SignedString([]byte(u.secret))
 	if err != nil {
-		c.JSON(200, utils.NewFailedResponse("验证出错"))
+		c.JSON(http.StatusOK, utils.NewFailedResponse("验证出错"))
 		return
 	}
 	err = service.GetUser().AutoCreateIfNotExist(c, address, address)
 	if err != nil {
-		c.JSON(200, utils.NewFailedResponse("登陆失败"))
+		c.JSON(http.StatusOK, utils.NewFailedResponse("登陆失败"))
 		return
 	}
 	c.JSON(http.StatusOK, utils.NewSuccessResponse(&struct {
