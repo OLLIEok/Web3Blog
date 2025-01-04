@@ -92,14 +92,36 @@ func (a *airport) FindAirportById(ctx context.Context, airportId uint) (res *mod
 	return resAny.(*model.Airport), err
 }
 
-func (a *airport) QueryRunningAirportWithWeightByPage(ctx context.Context, address string, page int, pageSize int) (res []*model.Airport, err error) {
+type AirportPagedView struct {
+	Data  []*model.Airport `json:"data"`
+	Total int64            `json:"total"`
+}
+
+func (a *airport) QueryRunningAirportWithWeightByPage(ctx context.Context, address string, page int, pageSize int) (res *AirportPagedView, err error) {
 	storage := db.GetMysql()
 	var raw any
-	raw, err, _ = a.sf.Do(fmt.Sprintf("running_%s_%d_%d", address, page, pageSize), func() (interface{}, error) {
-		var closureRes []*model.Airport
-		var closureRaw *sql.Rows
-		var closureErr error
-		closureRaw, closureErr = storage.WithContext(ctx).Raw(`SELECT
+	raw, err, _ = a.sf.Do(
+		fmt.Sprintf("running_%s_%d_%d", address, page, pageSize),
+		func() (interface{}, error) {
+			var closureRes = new(AirportPagedView)
+			var closureTotal int64
+			var closureErr error
+			closureErr = storage.WithContext(ctx).Raw(`SELECT
+		count(*) as total
+	FROM
+		airport AS a 
+	left JOIN 
+		airport_relationship AS ar
+	ON 	
+		a.id=ar.airport_id
+	where (ar.airport_id IS   NULL OR ar.user_address != ?) and (a.end_time is null or a.end_time > NOW())`, address).Row().Scan(&closureTotal)
+			if closureErr != nil {
+				return closureRes, closureErr
+			}
+			closureRes.Total = closureTotal
+			var closureData []*model.Airport
+			var closureRaw *sql.Rows
+			closureRaw, closureErr = storage.WithContext(ctx).Raw(`SELECT
 		a.id AS id,
 		a.name AS name,
 		a.start_time AS start_time,
@@ -122,44 +144,56 @@ func (a *airport) QueryRunningAirportWithWeightByPage(ctx context.Context, addre
 	where (ar.airport_id IS   NULL OR ar.user_address != ?) and (a.end_time is null or a.end_time > NOW()) 
 	ORDER BY a.weight desc
 	LIMIT ?  offset ?`, address, pageSize, (page-1)*pageSize).Rows()
-		if closureErr != nil {
+			if closureErr != nil {
+				return closureData, closureErr
+			}
+			for closureRaw.Next() {
+				var tmp = new(model.Airport)
+				if closureData == nil {
+					closureData = make([]*model.Airport, 0)
+				}
+				closureErr = storage.ScanRows(closureRaw, tmp)
+				if closureErr != nil {
+					return closureRes, closureErr
+				}
+				closureData = append(closureData, tmp)
+			}
+			closureRes.Data = closureData
 			return closureRes, closureErr
-		}
-		for closureRaw.Next() {
-			var tmp = new(model.Airport)
-			if closureRes == nil {
-				closureRes = make([]*model.Airport, 0)
-			}
-			err = storage.ScanRows(closureRaw, tmp)
-			if err != nil {
-				return closureRes, closureErr
-			}
-			closureRes = append(closureRes, tmp)
-		}
-		return closureRes, closureErr
-	})
+		},
+	)
 	if err != nil {
 		logrus.Errorf("query running airport (address:%s,page:%d,pagesize:%d) with weight by page error:%s ", address, page, pageSize, err.Error())
 		return
 	}
-	return raw.([]*model.Airport), err
+	return raw.(*AirportPagedView), err
 }
 
-func (a *airport) QueryFinishAirportWithFinishTimeByPage(ctx context.Context, page int, pagesize int) (res []*model.Airport, err error) {
+func (a *airport) QueryFinishAirportWithFinishTimeByPage(ctx context.Context, page int, pagesize int) (res *AirportPagedView, err error) {
 	var raw any
-
 	storage := db.GetMysql()
 	raw, err, _ = a.sf.Do(fmt.Sprintf("finish_%d_%d", page, pagesize), func() (interface{}, error) {
-		var closureRes []*model.Airport
+		var closureRes = new(AirportPagedView)
+		var closureData []*model.Airport
 		var closureErr error
-		closureErr = storage.WithContext(ctx).Model(&model.Airport{}).Where("end_time <= NOW()").Limit(pagesize).Offset((page - 1) * pagesize).Order("final_time desc").Find(&closureRes).Error
+		var closureTotal int64
+		closureErr = storage.WithContext(ctx).Model(&model.Airport{}).Select("count(*) as total").Where("end_time <= NOW()").Find(&closureTotal).Error
+		if closureErr != nil {
+			return closureRes, closureErr
+		}
+		closureRes.Total = closureTotal
+		closureErr = storage.WithContext(ctx).Model(&model.Airport{}).Where("end_time <= NOW()").Limit(pagesize).Offset((page - 1) * pagesize).Order("final_time desc").Find(&closureData).Error
+		if closureErr != nil {
+			return closureRes, closureErr
+		}
+		closureRes.Data = closureData
 		return closureRes, closureErr
 	})
 	if err != nil {
 		logrus.Errorf("query finish airport (page:%d,pageSize:%d) with finish_time by page error:%s", page, pagesize, err.Error())
 		return
 	}
-	return raw.([]*model.Airport), err
+	return raw.(*AirportPagedView), err
 }
 func (a *airport) UpdateAirport(ctx context.Context, data *model.Airport) (err error) {
 	cache := db.GetRedis()
@@ -171,6 +205,10 @@ func (a *airport) UpdateAirport(ctx context.Context, data *model.Airport) (err e
 	return storage.WithContext(ctx).Updates(data).Error
 }
 
+type MyAirportPagedView struct {
+	Data  []*MyAirportView `json:"data"`
+	Total int64            `json:"total"`
+}
 type MyAirportView struct {
 	model.Airport
 	UserBalance    float64    `json:"user_balance"`
@@ -178,20 +216,31 @@ type MyAirportView struct {
 	UserFinishTime *time.Time `json:"user_finish_time"`
 }
 
-func (a *airport) QueryMyAirportWithUpdateByPage(ctx context.Context, address string, page int, pageSize int) (res []*MyAirportView, err error) {
+func (a *airport) QueryMyAirportWithUpdateByPage(ctx context.Context, address string, page int, pageSize int) (res *MyAirportPagedView, err error) {
 	storage := db.GetMysql()
 	var raw any
 	raw, err, _ = a.sf.Do(fmt.Sprintf("my_%s_%d_%d", address, page, pageSize), func() (interface{}, error) {
-		var closureRes []*MyAirportView
+		var closureRes = new(MyAirportPagedView)
+		var closureData []*MyAirportView
 		var closureErr error
-		closureErr = storage.WithContext(ctx).Model(&model.Airport{}).Select("airport.*,ar.balance as user_balance,ar.update_time as user_update_time,ar.finish_time as user_finish_time").Joins("left join airport_relationship as ar on ar.delete_time is null and airport.id = ar.airport_id ").Where("ar.airport_id is not null").Offset((page - 1) * pageSize).Limit(pageSize).Order("ar.update_time,ar.finish_time").Find(&closureRes).Error
+		var closureTotal int64
+		closureErr = storage.WithContext(ctx).Model(&model.Airport{}).Select("count(*) as total ").Joins("left join airport_relationship as ar on ar.delete_time is null and airport.id = ar.airport_id ").Where("ar.airport_id is not null").Find(&closureTotal).Error
+		if closureErr != nil {
+			return closureRes, closureErr
+		}
+		closureRes.Total = closureTotal
+		closureErr = storage.WithContext(ctx).Model(&model.Airport{}).Select("airport.*,ar.balance as user_balance,ar.update_time as user_update_time,ar.finish_time as user_finish_time").Joins("left join airport_relationship as ar on ar.delete_time is null and airport.id = ar.airport_id ").Where("ar.airport_id is not null").Offset((page - 1) * pageSize).Limit(pageSize).Order("ar.update_time,ar.finish_time").Find(&closureData).Error
+		if closureErr != nil {
+			return closureRes, closureErr
+		}
+		closureRes.Data = closureData
 		return closureRes, closureErr
 	})
 	if err != nil {
 		logrus.Errorf("query my airport (address:%s,page:%d,pagesize:%d) with update by page error:%s", address, page, pageSize, err.Error())
 		return
 	}
-	return raw.([]*MyAirportView), err
+	return raw.(*MyAirportPagedView), err
 }
 
 // UpdateAirportBalance 允许一段时间的金额不一致,出现不一致的最大时间在于redis对这条数据的缓存时间

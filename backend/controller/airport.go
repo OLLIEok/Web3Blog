@@ -33,7 +33,7 @@ func (a *airport) FindFinishAirport(c *gin.Context) {
 		c.JSON(http.StatusOK, utils.NewFailedResponse("参数出错"))
 		return
 	}
-	var res []*model.Airport
+	var res *dao.AirportPagedView
 	res, err = service.GetAirport().QueryFinishAirportWithFinishTimeByPage(c, int(page), int(pagesize))
 	if err != nil {
 		c.JSON(http.StatusOK, utils.NewFailedResponse("查询失败"))
@@ -66,13 +66,26 @@ func (a *airport) FindRunningAirport(c *gin.Context) {
 		c.JSON(http.StatusOK, utils.NewFailedResponse("参数出错"))
 		return
 	}
-	var res []*model.Airport
+	var res *dao.AirportPagedView
 	res, err = service.GetAirport().QueryRunningAirportWithWeightByPage(c, address, int(page), int(pagesize))
 	if err != nil {
 		c.JSON(http.StatusOK, utils.NewFailedResponse("查询失败"))
 		return
 	}
 	c.JSON(http.StatusOK, utils.NewSuccessResponse(res))
+}
+func (a *airport) DeleteUserAirport(c *gin.Context) {
+	airportId, err := strconv.ParseUint(c.Query("id"), 10, 64)
+	if err != nil || airportId <= 0 {
+		c.JSON(http.StatusOK, utils.NewFailedResponse("参数出错"))
+		return
+	}
+	err = service.GetAirport().DeleteUserAirport(c, uint(airportId))
+	if err != nil {
+		c.JSON(http.StatusOK, utils.NewFailedResponse("删除失败"))
+		return
+	}
+	c.JSON(http.StatusOK, utils.NewSuccessResponse("删除成功"))
 }
 func (a *airport) DeleteAirport(c *gin.Context) {
 
@@ -129,6 +142,7 @@ func (a *airport) CreateAirport(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, utils.NewSuccessResponse("创建成功"))
 }
+
 func (a *airport) UpdateAirportInfo(c *gin.Context) {
 	var data = new(model.Airport)
 	err := c.Bind(data)
@@ -220,7 +234,7 @@ func (a *airport) FindMyAirport(c *gin.Context) {
 		c.JSON(http.StatusOK, utils.NewFailedResponse("参数出错"))
 		return
 	}
-	var res []*dao.MyAirportView
+	var res *dao.MyAirportPagedView
 	res, err = service.GetAirport().QueryMyAirportByPage(c, address, int(page), int(pagesize))
 	if err != nil {
 		c.JSON(http.StatusOK, utils.NewFailedResponse("查询出错"))

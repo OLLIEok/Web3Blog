@@ -77,6 +77,9 @@ func bindAirportRoutes(engine *gin.Engine) {
 	route.GET("/delete", jwt.NewVerifyMiddleware(), whitepaper.WhitepaperMiddleware(), func(ctx *gin.Context) {
 		controller.GetAirport().DeleteAirport(ctx)
 	})
+	route.GET("/cancel", jwt.NewVerifyMiddleware(), func(ctx *gin.Context) {
+		controller.GetAirport().DeleteUserAirport(ctx)
+	})
 	route.GET("/update", jwt.NewVerifyMiddleware(), func(context *gin.Context) {
 		controller.GetAirport().UpdateAirport(context)
 	})

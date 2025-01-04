@@ -21,14 +21,14 @@ func GetAirport() *airport {
 	return airportService
 }
 
-func (a *airport) QueryFinishAirportWithFinishTimeByPage(ctx context.Context, page int, pageSize int) ([]*model.Airport, error) {
+func (a *airport) QueryFinishAirportWithFinishTimeByPage(ctx context.Context, page int, pageSize int) (*dao.AirportPagedView, error) {
 	return dao.GetAirport().QueryFinishAirportWithFinishTimeByPage(ctx, page, pageSize)
 }
-func (a *airport) QueryRunningAirportWithWeightByPage(ctx context.Context, address string, page int, pageSize int) ([]*model.Airport, error) {
+func (a *airport) QueryRunningAirportWithWeightByPage(ctx context.Context, address string, page int, pageSize int) (*dao.AirportPagedView, error) {
 	return dao.GetAirport().QueryRunningAirportWithWeightByPage(ctx, address, page, pageSize)
 }
 
-func (a *airport) QueryMyAirportByPage(ctx context.Context, address string, page int, pageSize int) (res []*dao.MyAirportView, err error) {
+func (a *airport) QueryMyAirportByPage(ctx context.Context, address string, page int, pageSize int) (res *dao.MyAirportPagedView, err error) {
 	return dao.GetAirport().QueryMyAirportWithUpdateByPage(ctx, address, page, pageSize)
 }
 func (a *airport) CreateAirport(ctx context.Context, data *model.Airport) (err error) {
@@ -132,4 +132,12 @@ func (a *airport) updateUserUpdateTime(ctx context.Context, data *UpdateAirportT
 
 func (a *airport) DeleteAirport(ctx context.Context, airportId uint) (err error) {
 	return dao.GetAirport().DeleteAirport(ctx, airportId)
+}
+
+func (a *airport) DeleteUserAirport(ctx context.Context, airportId uint) (err error) {
+	address := ctx.Value("address").(string)
+	return dao.GetAirportRelationship().DeleteAirportRelationship(ctx, &model.AirportRelationship{
+		AirportId:   airportId,
+		UserAddress: address,
+	})
 }
