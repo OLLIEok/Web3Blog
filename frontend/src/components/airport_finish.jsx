@@ -2,7 +2,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import {Skeleton, Form, Input, Progress, Table, Tag, Tooltip, Statistic,DatePicker} from 'antd';
 import { motion } from 'framer-motion';
-import {ClockCircleOutlined, InfoCircleOutlined} from "@ant-design/icons";
+import {ClockCircleOutlined, InfoCircleOutlined,DeleteOutlined} from "@ant-design/icons";
 import {Star} from "./index.js";
 import Constants from '../util/constants.js';
 import { toast } from 'react-toastify';
@@ -97,6 +97,9 @@ const EditableCell = ({
     return <td {...restProps}>{childNode}</td>;
 };
 const FinishAirport = () => {
+    const [currentPage, setCurrentPage] = useState(1);  
+    const [pageSize, setPageSize] = useState(10); 
+    const [total, setTotal] = useState(); 
     const { AirportClient,isAdmin} = useContext(HttpAgent);
     const [dataSource, setDataSource] = useState(null);
     useEffect(()=>{
@@ -104,14 +107,14 @@ const FinishAirport = () => {
     },[])
     const findFinishAirportByPage = async (page,pagesize)=>{
        const resp = await AirportClient.FindFinishAirport(page,pagesize);
-       console.log(resp);
        if(!resp||!resp.status){
             toast.error('查询空投失败');
             return;
         }
-    if (resp.data){
-        setDataSource(resp.data.map((item)=>{item.key=item.id;return ObtainAirportStatus(item)}));
-    }
+        if(resp.data.data && resp.data.total){
+          setDataSource(resp.data.data.map((item)=>{item.key=item.id;return ObtainAirportStatus(item)}));
+           setTotal(resp.data.total);
+          }
     }
     const handleDelete =async (item) => {
         const resp = await AirportClient.DeleteAirport(item.id);
@@ -126,6 +129,7 @@ const FinishAirport = () => {
     const defaultColumns = [
         {
             title: "状态",
+            width: '8%',
             align: "center",
             dataIndex: "status",
             render: (_, record) => {
@@ -147,6 +151,7 @@ const FinishAirport = () => {
         },
         {
             title: '进度',
+            width: '8%',
             align: "center",
             render: (_, record) => {
                 let end = new Date(record.end_time).getTime();
@@ -165,12 +170,14 @@ const FinishAirport = () => {
         },
         {
             title: '项目名',
+            width: '10%',
             dataIndex: 'name',
             editable: isAdmin,
             align:"center",
         },
         {
             title: '官网地址',
+            width: '5%',
             dataIndex: 'address',
             editable: isAdmin,
             align:"center",
@@ -180,18 +187,19 @@ const FinishAirport = () => {
         },
         {
             title: '赛道',
+            width: '12%',
             dataIndex: 'tag',
             editable: isAdmin,
             align:"center",
             render:(_,record)=>{
-                return   <div className={"flex  justify-center items-center"}>
+                return   <div className={"flex  justify-center items-center flex-wrap"}>
                     {record.tag.split(',').map((tag) => {
                         let color = tag.length > 5 ? 'geekblue' : 'green';
                         if (tag === 'loser') {
                             color = 'volcano';
                         }
                         return (
-                            <Tag color={color} key={tag}>
+                            <Tag color={color} key={tag} style={{ marginBottom: '4px' }}>
                                 {tag.toUpperCase()}
                             </Tag>
                         );
@@ -201,6 +209,7 @@ const FinishAirport = () => {
         },
         {
             title: '融资金额',
+            width: '12%',
             dataIndex: 'financing_balance',
             editable: isAdmin,
             align:"center",
@@ -210,15 +219,16 @@ const FinishAirport = () => {
         },
         {
             title: '融资来源方',
+            width: '13%',
             dataIndex: 'financing_from',
             editable: isAdmin,
             align:"center",
             render:(_,record)=>{
-                return   <div className={"flex  justify-center items-center"}>
+                return   <div className={"flex  justify-center items-center flex-wrap"}>
                     {record.financing_from.split(',').map((tag) => {
                         let color = tag.length > 5 ? 'geekblue' : 'volcano';
                         return (
-                            <Tag color={color} key={tag}>
+                            <Tag color={color} key={tag} style={{ marginBottom: '4px' }}>
                                 {tag.toUpperCase()}
                             </Tag>
                         );
@@ -228,6 +238,7 @@ const FinishAirport = () => {
         },
         {
             title: '教程',
+            width: '5%',
             dataIndex: 'teaching',
             editable: isAdmin,
             align:"center",
@@ -237,15 +248,16 @@ const FinishAirport = () => {
         },
         {
             title: '任务类型',
+            width: '12%',
             dataIndex: 'task_type',
             editable: isAdmin,
             align:"center",
             render:(_,record)=>{
-                return   <div className={"flex  justify-center items-center"}>
+                return   <div className={"flex  justify-center items-center flex-wrap"}>
                     {record.task_type.split(',').map((tag) => {
                         let color = tag.length > 5 ? 'magenta' : 'purple';
                         return (
-                            <Tag color={color} key={tag}>
+                            <Tag color={color} key={tag} style={{ marginBottom: '4px' }}>
                                 {tag.toUpperCase()}
                             </Tag>
                         );
@@ -254,8 +266,9 @@ const FinishAirport = () => {
             }
         },
         {
-            title:<Tooltip placement={"rightTop"} color={"rgba(116,112,112,0.88)"} title={"该空投在平台收集的空投中的评分"}>空投质量<InfoCircleOutlined  className={"relative  bottom-3 left-2"}/></Tooltip>,
+            title:<Tooltip placement={"bottom"} color={"rgba(116,112,112,0.88)"} title={"该空投在平台收集的空投中的评分"}>空投质量</Tooltip>,
             dataIndex: 'weight',
+            width: '5%',
             align:"center",
             editable: isAdmin,
             render:(_,record)=>{
@@ -265,8 +278,9 @@ const FinishAirport = () => {
             }
         },
         {
-            title: <Tooltip placement={"rightTop"} color={"rgba(116,112,112,0.88)"} title={"平台用户获取该空投的总数量"}>空投数量<InfoCircleOutlined  className={"relative  bottom-3 left-2"}/></Tooltip>,
+            title: <Tooltip placement={"bottom"} color={"rgba(116,112,112,0.88)"} title={"平台用户获取该空投的总数量"}>空投数量</Tooltip>,
             dataIndex: "airport_balance",
+            width: '7%',
             align:"center",
             render: (_, record) => {
                 return(
@@ -281,24 +295,26 @@ const FinishAirport = () => {
         },
         {
             title: '进展',
+            width: '6%',
             dataIndex: 'operation',
             align:"center",
             hidden:!isAdmin,
             render: (_, record) =>
                 dataSource.length >= 1 ? (
-                    isAdmin && <div className={"w-full justify-center items-center flex-col"}>
-
-                        <motion.button whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                            className={"motion-button  px-1"} title="删除空投"
-                            style={{ width: "80px", height: "40px" }}
-                            key={record.key}
-                            onClick={() => handleDelete(record)}>
-                            <a>删除空投</a>
-                        </motion.button>
-
-                    </div>
+                    isAdmin && <Tooltip title="删除空投">
+                    <motion.div 
+                        whileHover={{ scale: 1.1 }} 
+                        whileTap={{ scale: 0.9 }} 
+                        transition={{ type: "spring", stiffness: 400, damping: 10 }} 
+                        style={{ marginBottom: '5px' }} 
+                    >
+                        <DeleteOutlined
+                            className="text-blue-700" 
+                            style={{ fontSize: '18px' }}
+                            onClick={() => handleDelete(record)}
+                        />
+                    </motion.div>
+                </Tooltip>
                 ) : null,
         },
     ];
@@ -334,21 +350,38 @@ const FinishAirport = () => {
         };
     });
     return (
-        <div className={"w-full h-full flex justify-center items-center flex-col"}>
+        // <div className={"w-full h-full flex justify-center items-center flex-col"}>
             <div>
                 <Table
-                  key={"finish"}
-                    tableLayout={"auto"}
+                  key={"my"}
+                  sticky
+                    // tableLayout={"auto"}
                     components={components}
-                     sticky
                     rowClassName={() => 'editable-row'}
                     bordered
-                    className={"w-full flex justify-center items-center h-full"}
+                    className={"w-full   h-full"}
                     dataSource={dataSource}
                     columns={columns}
+                    scroll={{ x: true }}
+                    // size='midium'
+                    pagination={{
+                      current: currentPage, 
+                      pageSize: pageSize,     
+                      total: total,           
+                      showSizeChanger: true,  
+                      pageSizeOptions: ['1', '10', '25', '50'], 
+                      onChange: (page, size) => {
+                        setCurrentPage(page);
+                        setPageSize(size);
+                        findFinishAirportByPage(page, size);
+                      }, 
+                      onShowSizeChange: (current, size) => {
+                        setPageSize(size);
+                      }, 
+                    }}
                 />
             </div>
-        </div>
+        // </div>
     )
 }
 export default FinishAirport;

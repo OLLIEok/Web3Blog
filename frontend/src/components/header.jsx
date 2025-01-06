@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {useNavigate} from "react-router-dom";
 import {Search} from './search';
-import {AutoComplete, Divider, List, Modal, Skeleton, Tag} from 'antd';
+import {AutoComplete, Divider, List, Modal, Skeleton, Tag,Button} from 'antd';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Constants from '../util/constants';
 import {toast} from 'react-toastify';
@@ -241,11 +241,29 @@ const Header = () => {
                     <div
                         className=" hidden md:flex w-1/8 justify-evenly ">{userAccount != null && userAccount.length > 0 ?
                         <Avatar/> :
-                        <motion.button style={{width: "150px", height: " 60px"}} whileHover={{scale: 1.1}}
-                                       whileTap={{scale: 0.95}} className={"motion-button "}
-                                       onClick={() => {
-                                           setSearchWalletModal(!searchWalletModal)
-                                       }}>Connect Wallet</motion.button>}</div>
+                        <motion.div
+                whileHover={{ scale: 1.1 }} // Hover时放大
+                whileTap={{ scale: 0.95 }}  // 点击时缩小
+                transition={{ duration: 0.3 }} 
+            >
+                <Button
+                    type="primary"
+                    style={{
+                        width: '140px',
+                        height: '60px',
+                        borderRadius: '30px',  
+                        backgroundColor: '#333', 
+                        color: '#fff',           
+                        border: 'none',          
+                        fontWeight: 'bold',      
+                    }}
+                    onClick={() => {
+                        setSearchWalletModal(!searchWalletModal);
+                    }}
+                >
+                    Connect Wallet
+                </Button>
+            </motion.div>}</div>
                 </div>)}
                 {changeHeader &&
                     <div className="w-full h-full hidden md:flex">
@@ -261,7 +279,7 @@ const Header = () => {
                     </div>
                 }
                 {/* 小屏幕显示 */}
-                <div className="w-full h-2/3 md:hidden">
+                <div className="w-full h-2/3 md:hidden ml-20">
                     <Search onKeyDown={(event) => {
                         if (event.keyCode !== 13) {
                             return;

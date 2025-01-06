@@ -17,7 +17,7 @@ const AirPort = () => {
         <div className={"w-full h-full flex justify-center items-start"}>
             <Header/>
             <div className={"w-full h-full flex justify-center pt-32 items-center flex-row "}>
-                <div className="airpointwindow flex justify-start items-center">
+                <div className="airpointwindow  flex-col" style={{width:'95%'}}>
                     <nav className={" justify-center w-full flex items-center"}>
                         <ul className={"w-full h-full"}>
                             {tabs.map((item) => (
@@ -27,7 +27,8 @@ const AirPort = () => {
                                     onClick={() => setSelectedTab(item)}
                                 >
                                     <div className={"flex w-full h-full justify-center items-center "}>
-                                    {item.icon} <div className={" lg:pl-3 lg:text-3xl text-xl "}>{`${item.label}`}</div>
+                                    {item.icon} <div className="text-sm sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl">
+                                              {`${item.label}`}</div>
                                     </div>
                                     {item === selectedTab &&(
                                         <motion.div className="underline" layoutId="underline"/>
@@ -36,7 +37,7 @@ const AirPort = () => {
                             ))}
                         </ul>
                     </nav>
-                    <main className={"w-full pt-20 "}>
+                    <main className={"w-full pt-12 "}>
                         <AnimatePresence mode="wait">
                             <motion.div
                                 className={" min-w-full"}

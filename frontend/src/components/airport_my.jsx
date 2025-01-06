@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from 'react';
 import {Form, Input, Progress, Skeleton, Statistic, Table, Tag, Tooltip} from 'antd';
 import {motion} from 'framer-motion';
-import {CheckCircleOutlined, ExclamationCircleOutlined,MinusCircleOutlined, ClockCircleOutlined ,InfoCircleOutlined, SyncOutlined} from "@ant-design/icons";
+import {CheckCircleOutlined, ExclamationCircleOutlined,MinusCircleOutlined, ClockCircleOutlined ,InfoCircleOutlined, SyncOutlined,RocketOutlined,StopOutlined,DeleteOutlined} from "@ant-design/icons";
 import {Star} from "./index.js";
 import {isToday} from "../util/date.js";
 import { toast } from 'react-toastify';
@@ -39,7 +39,6 @@ const ObtainAirportStatus = (item)=>{
         }
     }
     }else {
-    
         let airport_user_finish_time =now;
         if (item.user_finish_time){
             airport_user_finish_time = new Date(item.user_finish_time).getTime();
@@ -122,33 +121,38 @@ const EditableCell = ({
     return <td {...restProps}>{childNode}</td>;
 };
 const MyAirport = () => {
-
+    const [currentPage, setCurrentPage] = useState(1);  // 当前页
+    const [pageSize, setPageSize] = useState(10); // 每页条数
+    const [total, setTotal] = useState(); // 总条数
     const { AirportClient,isAdmin} = useContext(HttpAgent);
     const [dataSource, setDataSource] = useState([]);
     useEffect(()=>{
-            findMyAirport(1,Constants.PageSize);
+            findMyAirport(1,pageSize);
     },[])
     const findMyAirport = (page, pageSize) => {
         AirportClient.FindAirportByAddress(page, pageSize).then((data) => {
 
             if (!data||!data.status){
-                toast.error("查询失败");
+                // toast.error("查询失败");
                 return;
             }
-            if(data.data){
-            setDataSource(data.data.map((item)=>{item.key=item.id;return ObtainAirportStatus(item)}));
+            if(data.data.data && data.data.total){
+            setDataSource(data.data.data.map((item)=>{item.key=item.id;return ObtainAirportStatus(item)}));
+             setTotal(data.data.total);
+            // console.log(data.data.total);
             }
         })
     }
     const handleDelete =async (item) => {
-        const resp = await AirportClient.DeleteAirport(item.id);
+        const resp = await AirportClient.CleanAirport(item.id);
+        console.log(resp);
         if(!resp||!resp.status){
-            toast.error('删除'+item.name+'空投失败');
+            toast.error('移除'+item.name+'空投失败');
            return;
       }
         const newData = dataSource.filter((data) => data.key !== item.key);
         setDataSource(newData);
-        toast.success('删除'+item.name+'空投');
+        toast.success('移除'+item.name+'空投');
     };
     const finishAirport = async (item)=>{
         const resp =await AirportClient.FinishAirport(item.id);
@@ -196,6 +200,7 @@ const MyAirport = () => {
         {
             title: "状态",
             align: "center",
+            width: '7%',
             dataIndex: "status",
             render: (_, record) => {
                 switch (record.status) {
@@ -241,6 +246,7 @@ const MyAirport = () => {
         {
             title: '进度',
             align: "center",
+            width: '8%',
             render: (_, record) => {
                 let start = new Date(record.start_time).getTime();
                 let end = new Date(record.end_time).getTime();
@@ -263,11 +269,13 @@ const MyAirport = () => {
         },
         {
             title: '项目名',
+            width: '10%',
             dataIndex: 'name',
             align: "center",
         },
         {
             title: '官网地址',
+            width: '5%',
             dataIndex: 'address',
             align: "center",
             render: (_, record) => {
@@ -276,17 +284,18 @@ const MyAirport = () => {
         },
         {
             title: '赛道',
+            width: '11%',
             dataIndex: 'tag',
             align: "center",
             render: (_, record) => {
-                return <div className={"flex  justify-center items-center"}>
+                return <div className={"flex  justify-center items-center flex-wrap"}>
                     {record.tag.split(',').map((tag) => {
                         let color = tag.length > 5 ? 'geekblue' : 'green';
                         if (tag === 'loser') {
                             color = 'volcano';
                         }
                         return (
-                            <Tag color={color} key={tag}>
+                            <Tag color={color} key={tag} style={{ marginBottom: '4px' }}>
                                 {tag.toUpperCase()}
                             </Tag>
                         );
@@ -296,6 +305,7 @@ const MyAirport = () => {
         },
         {
             title: '融资金额',
+            width: '10%',
             dataIndex: 'financing_balance',
             align: "center",
             render:(_,item)=>{
@@ -304,14 +314,15 @@ const MyAirport = () => {
         },
         {
             title: '融资来源方',
+            width: '12%',
             dataIndex: 'financing_from',
             align: "center",
             render: (_, record) => {
-                return <div className={"flex  justify-center items-center"}>
+                return <div className={"flex  justify-center items-center flex-wrap"}>
                     {record.financing_from.split(',').map((tag) => {
                         let color = tag.length > 5 ? 'geekblue' : 'volcano';
                         return (
-                            <Tag color={color} key={tag}>
+                            <Tag color={color} key={tag} style={{ marginBottom: '4px' }}>
                                 {tag.toUpperCase()}
                             </Tag>
                         );
@@ -321,6 +332,7 @@ const MyAirport = () => {
         },
         {
             title: '教程',
+            width: '5%',
             dataIndex: 'teaching',
             align: "center",
             render: (_, record) => {
@@ -328,10 +340,10 @@ const MyAirport = () => {
             }
         },
         {
-            title: <Tooltip placement={"rightTop"} color={"rgba(116,112,112,0.88)"}
-                            title={"该空投在平台收集的空投中的评分"}>空投质量<InfoCircleOutlined
-                className={"relative  bottom-3 left-2"}/></Tooltip>,
+            title: <Tooltip placement={"bottom"} color={"rgba(116,112,112,0.88)"}
+                            title={"该空投在平台收集的空投中的评分"}>空投质量</Tooltip>,
             dataIndex: 'weight',
+            width: '5%',
             align: "center",
             render: (_, record) => {
                 return (
@@ -342,13 +354,14 @@ const MyAirport = () => {
         {
             title: '任务类型',
             dataIndex: 'task_type',
+            width: '12%',
             align: "center",
             render: (_, record) => {
-                return <div className={"flex  justify-center items-center"}>
+                return <div className={"flex  justify-center items-center flex-wrap"}>
                     {record.task_type.split(',').map((tag) => {
                         let color = tag.length > 5 ? 'magenta' : 'purple';
                         return (
-                            <Tag color={color} key={tag}>
+                            <Tag color={color} key={tag} style={{ marginBottom: '4px' }}>
                                 {tag.toUpperCase()}
                             </Tag>
                         );
@@ -357,85 +370,103 @@ const MyAirport = () => {
             }
         },
         {
-            title: <Tooltip placement={"rightTop"} color={"rgba(116,112,112,0.88)"}
-                            title={"平台用户获取该空投的总数量"}>空投数量<InfoCircleOutlined
-                className={"relative  bottom-2 left-1"}/></Tooltip>,
+            title: <Tooltip placement={"bottom"} color={"rgba(116,112,112,0.88)"}
+                            title={"平台用户获取该空投的总数量"}>空投数量</Tooltip>,
             dataIndex: "balance",
+            width: '7%',
             align: "center",
             render: (_, record) => (record.status === AirportStatus.SuccessObtain)? (
                 <Statistic  value={record.balance}/>
             ):<Skeleton paragraph={{
             rows: 1,
         }} active />,
-            onCell: (item) => {
-                if (item.status === AirportStatus.SuccessObtain) {
-                    return {colSpan: 2};
-                } else {
-                    return {colSpan: 0};
-                }
-
-            }
+            
         },
         {
             title: '进展',
+            width: '6%',
             dataIndex: 'operation',
             align: "center",
-            onCell: (record) => {
-                if (!isAdmin&&(record.status === AirportStatus.Expire|| record.status === AirportStatus.SuccessObtain|| record.status === AirportStatus.UnStart)) {
-                    return {colSpan: 0};
-                }
-                return {
-                    colSpan:2,
-                }
-            },
+            // onCell: (record) => {
+            //     if (!isAdmin&&(record.status === AirportStatus.Expire|| record.status === AirportStatus.SuccessObtain|| record.status === AirportStatus.UnStart)) {
+            //         return {colSpan: 0};
+            //     }
+            //     return {
+            //         colSpan:2,
+            //     }
+            // },
             render: (_, record) =>
-                dataSource.length >= 1 && (<>{
-                        record.stauts === AirportStatus.UnFinishToday &&
-                        <motion.button whileHover={{scale: 1.1}}
-                                       whileTap={{scale: 0.9}}
-                                       transition={{type: "spring", stiffness: 400, damping: 10}}
-                                       className={"motion-button  px-1"} title="完成任务"
-                                       style={{width: "80px", height: "40px" ,background:"#b7eb8f"}}
-                                       key={record.key}
-                                       onClick={() => handleTodayFinish(record)}>
-                            <a>今日完成</a>
-                        </motion.button>
-                    }
-                        {record.status === AirportStatus.NeedToObtain && <motion.button whileHover={{scale: 1.1}}
-                                                                       whileTap={{scale: 0.9}}
-                                                                       transition={{
-                                                                           type: "spring",
-                                                                           stiffness: 400,
-                                                                           damping: 10
-                                                                       }}
-                                                                       className={"motion-button  px-1"} title="领取空投"
-                                                                       style={{width: "80px", height: "40px",background:"#faad14"}}
-                                                                       key={record.key}
-                                                                       onClick={() => handleObtainAirport(record)}>
-                            <a>领取</a>
-                        </motion.button>}
-                        {isAdmin &&
-                            <motion.button whileHover={{scale: 1.1}}
-                                           whileTap={{scale: 0.9}}
-                                           transition={{type: "spring", stiffness: 400, damping: 10}}
-                                           className={"motion-button  px-1"} title="结束空投"
-                                           style={{width: "80px", height: "40px"}}
-                                           key={record.key}
-                                           onClick={() => finishAirport(record)}>
-                                <a>结束空投</a>
-                            </motion.button>}
-                        {isAdmin &&
-                            <motion.button whileHover={{scale: 1.1}}
-                                           whileTap={{scale: 0.9}}
-                                           transition={{type: "spring", stiffness: 400, damping: 10}}
-                                           className={"motion-button  px-1"} title="删除空投"
-                                           style={{width: "80px", height: "40px"}}
-                                           key={record.key}
-                                           onClick={() => handleDelete(record)}>
-                                <a>删除空投</a>
-                            </motion.button>}
-                    </>
-                )
+              dataSource.length >= 1 && (
+                <>
+                    {record.status === AirportStatus.UnFinishToday && (
+                        <Tooltip title="完成任务">
+                            <motion.div 
+                                whileHover={{ scale: 1.1 }} 
+                                whileTap={{ scale: 0.9 }} 
+                                transition={{ type: "spring", stiffness: 400, damping: 10 }} 
+                                style={{ marginBottom: '5px' }} 
+                            >
+                                <CheckCircleOutlined
+                                    className="text-green-700" 
+                                    style={{ fontSize: '18px' }}
+                                    onClick={() => handleTodayFinish(record)}
+                                />
+                            </motion.div>
+                        </Tooltip>
+                    )}
+
+                    {record.status === AirportStatus.NeedToObtain && (
+                        <Tooltip title="领取空投">
+                            <motion.div 
+                                whileHover={{ scale: 1.1 }} 
+                                whileTap={{ scale: 0.9 }} 
+                                transition={{ type: "spring", stiffness: 400, damping: 10 }} 
+                                style={{ marginBottom: '5px' }} 
+                            >
+                                <RocketOutlined
+                                    className="text-yellow-700" 
+                                    style={{ fontSize: '20px' }}
+                                    onClick={() => handleObtainAirport(record)}
+                                />
+                            </motion.div>
+                        </Tooltip>
+                    )}
+
+                    {isAdmin && (
+                        <Tooltip title="结束空投">
+                            <motion.div 
+                                whileHover={{ scale: 1.1 }} 
+                                whileTap={{ scale: 0.9 }} 
+                                transition={{ type: "spring", stiffness: 400, damping: 10 }} 
+                                style={{ marginBottom: '5px' }} 
+                            >
+                                <StopOutlined
+                                    className="text-red-700" 
+                                    style={{ fontSize: '18px' }}
+                                    onClick={() => finishAirport(record)}
+                                />
+                            </motion.div>
+                        </Tooltip>
+                    )}
+
+                    {isAdmin && (
+                        <Tooltip title="移除空投">
+                            <motion.div 
+                                whileHover={{ scale: 1.1 }} 
+                                whileTap={{ scale: 0.9 }} 
+                                transition={{ type: "spring", stiffness: 400, damping: 10 }} 
+                                style={{ marginBottom: '5px' }} 
+                            >
+                                <DeleteOutlined
+                                    className="text-blue-700" 
+                                    style={{ fontSize: '18px' }}
+                                    onClick={() => handleDelete(record)}
+                                />
+                            </motion.div>
+                        </Tooltip>
+                    )}
+                </>
+              ),
         },
     ];
 
@@ -477,21 +508,38 @@ const MyAirport = () => {
         };
     });
     return (
-        <div className={"w-full h-full flex justify-center items-center flex-col"}>
-            <div>
+        // <div className={"w-full h-full flex justify-center items-center flex-col"}>
+           
                 <Table
                   key={"my"}
                   sticky
-                    tableLayout={"auto"}
+                    // tableLayout={"auto"}
                     components={components}
                     rowClassName={() => 'editable-row'}
                     bordered
-                    className={"w-full flex justify-center items-center h-full"}
+                    className={"w-full   h-full"}
                     dataSource={dataSource}
                     columns={columns}
+                    scroll={{ x: true }}
+                    // size='midium'
+                    pagination={{
+                      current: currentPage,  // 当前页码
+                      pageSize: pageSize,     // 每页数据数量
+                      total: total,           // 数据总数
+                      showSizeChanger: true,  // 显示每页条目数量选择器
+                      pageSizeOptions: ['1', '10', '25', '50'], // 每页显示条目的选择项
+                      onChange: (page, size) => {
+                        setCurrentPage(page);
+                        setPageSize(size);
+                        findMyAirport(page, size);
+                      }, // 页码变化时的回调函数
+                      onShowSizeChange: (current, size) => {
+                        setPageSize(size);
+                      }, // 每页条目数量变化时的回调函数
+                    }}
                 />
-            </div>
-        </div>
+          
+        //  </div>
     )
 }
 export default MyAirport;

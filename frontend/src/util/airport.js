@@ -2,11 +2,14 @@
 export const AirportStatus = {
     UnStart :"unstart",
     Running:"running",
+    Finish:"finish",
     UnFinishToday:"unfinishToday",
     NeedToObtain:"needToObtain",
     SuccessObtain:"successObtain",
-    Expire:"expirt",
-    Finish:"finish",
+    Expire:"expire",
     Obtaining:"obtaining",
 } 
+
+
+
 

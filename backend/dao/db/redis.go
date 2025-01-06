@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
