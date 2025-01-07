@@ -121,25 +121,24 @@ const EditableCell = ({
     return <td {...restProps}>{childNode}</td>;
 };
 const MyAirport = () => {
-    const [currentPage, setCurrentPage] = useState(1);  // 当前页
-    const [pageSize, setPageSize] = useState(10); // 每页条数
-    const [total, setTotal] = useState(); // 总条数
+    const [currentPage, setCurrentPage] = useState(1); 
+    const [total, setTotal] = useState();
     const { AirportClient,isAdmin} = useContext(HttpAgent);
     const [dataSource, setDataSource] = useState([]);
     useEffect(()=>{
-            findMyAirport(1,pageSize);
+            findMyAirport(1,Constants.PageSize);
     },[])
     const findMyAirport = (page, pageSize) => {
         AirportClient.FindAirportByAddress(page, pageSize).then((data) => {
-
             if (!data||!data.status){
-                // toast.error("查询失败");
+
+                    toast.error("查询失败");
+
                 return;
             }
             if(data.data.data && data.data.total){
             setDataSource(data.data.data.map((item)=>{item.key=item.id;return ObtainAirportStatus(item)}));
              setTotal(data.data.total);
-            // console.log(data.data.total);
             }
         })
     }
@@ -523,19 +522,14 @@ const MyAirport = () => {
                     scroll={{ x: true }}
                     // size='midium'
                     pagination={{
-                      current: currentPage,  // 当前页码
-                      pageSize: pageSize,     // 每页数据数量
-                      total: total,           // 数据总数
-                      showSizeChanger: true,  // 显示每页条目数量选择器
-                      pageSizeOptions: ['1', '10', '25', '50'], // 每页显示条目的选择项
+                      current: currentPage,  
+                      pageSize: Constants.PageSize,   
+                      total: total,          
+                      showSizeChanger: false, 
                       onChange: (page, size) => {
                         setCurrentPage(page);
-                        setPageSize(size);
                         findMyAirport(page, size);
-                      }, // 页码变化时的回调函数
-                      onShowSizeChange: (current, size) => {
-                        setPageSize(size);
-                      }, // 每页条目数量变化时的回调函数
+                      }, 
                     }}
                 />
           

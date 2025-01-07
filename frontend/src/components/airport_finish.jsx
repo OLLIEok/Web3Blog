@@ -97,13 +97,12 @@ const EditableCell = ({
     return <td {...restProps}>{childNode}</td>;
 };
 const FinishAirport = () => {
-    const [currentPage, setCurrentPage] = useState(1);  
-    const [pageSize, setPageSize] = useState(10); 
+    const [currentPage, setCurrentPage] = useState(1); 
     const [total, setTotal] = useState(); 
     const { AirportClient,isAdmin} = useContext(HttpAgent);
     const [dataSource, setDataSource] = useState(null);
     useEffect(()=>{
-            findFinishAirportByPage(1,Constants.PageSize)
+            findFinishAirportByPage(1,Constants.PageSize);
     },[])
     const findFinishAirportByPage = async (page,pagesize)=>{
        const resp = await AirportClient.FindFinishAirport(page,pagesize);
@@ -366,17 +365,12 @@ const FinishAirport = () => {
                     // size='midium'
                     pagination={{
                       current: currentPage, 
-                      pageSize: pageSize,     
+                      pageSize: Constants.PageSize,     
                       total: total,           
-                      showSizeChanger: true,  
-                      pageSizeOptions: ['1', '10', '25', '50'], 
+                      showSizeChanger: false,  
                       onChange: (page, size) => {
                         setCurrentPage(page);
-                        setPageSize(size);
                         findFinishAirportByPage(page, size);
-                      }, 
-                      onShowSizeChange: (current, size) => {
-                        setPageSize(size);
                       }, 
                     }}
                 />

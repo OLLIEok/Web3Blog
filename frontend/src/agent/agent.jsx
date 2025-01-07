@@ -45,7 +45,7 @@ export default function Agent({setSearchWalletModal,selectedWallet,userAccount})
                     SetAuthorization(null);
                     setIsAdmin(false);
                     setSearchWalletModal(true);
-                    toast.error("请先登录");
+                    toast.warn("请先登录");
                     return;
                 }
                 toast.error("系统出错啦");
@@ -56,7 +56,7 @@ export default function Agent({setSearchWalletModal,selectedWallet,userAccount})
                     SetAuthorization(null);
                     setIsAdmin(false);
                     setSearchWalletModal(true);
-                    toast.error("请先登录");
+                    toast.warn("请先登录");
                     return;
                 }
                 toast.error("系统出错啦");
@@ -67,7 +67,7 @@ export default function Agent({setSearchWalletModal,selectedWallet,userAccount})
                     SetAuthorization(null);
                     setIsAdmin(false);
                     setSearchWalletModal(true);
-                    toast.error("请先登录");
+                    toast.warn("请先登录");
                     return;
                 }
                 toast.error("系统出错啦");
@@ -78,7 +78,7 @@ export default function Agent({setSearchWalletModal,selectedWallet,userAccount})
                     SetAuthorization(null);
                     setSearchWalletModal(true);
                     setIsAdmin(false);
-                    toast.error("请先登录");
+                    toast.warn("请先登录");
                     return;
                 }
                 toast.error("系统出错啦");

@@ -12,7 +12,7 @@ const AirPort = () => {
         {icon:<PlusSquareFilled  height={10} width={10}/>, label: "发现空投",content:<RunningAirport />},
         {icon: <ClockCircleFilled  height={10} width={10} />, label: "已结束的空投",content:<FinishAirport />},
     ]);
-    const [selectedTab, setSelectedTab] = useState(tabs[0]);
+    const [selectedTab, setSelectedTab] = useState(tabs[1]);
     return (
         <div className={"w-full h-full flex justify-center items-start"}>
             <Header/>
