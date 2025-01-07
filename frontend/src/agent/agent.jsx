@@ -9,7 +9,6 @@ const superagent = superagentPromise(_superagent, Promise);
 
 const localStorageKey = 'blog-auth-token';
 const API_ROOT ="https://www.0xdoomxy.top/blog";
-
 // const SetAuthorizetion = (token) =>{
 //     superagent('Authorization',`Bearer ${token}`);
 // }
@@ -104,6 +103,7 @@ export default function Agent({setSearchWalletModal,selectedWallet,userAccount})
         AddAirport: (airport) => requests.post(`/airport/create`, airport),
         FinishAirport: (id) => requests.post(`/airport/update`,{id:id,end_time:new Date()}),
         DeleteAirport: (id) => requests.get(`/airport/delete?id=${encode(id)}`),
+        CleanAirport: (airportid) => requests.get(`/airport/clean?id=${encode(airportid)}`),
         FindAirportByAddress: (page, pageSize) => requests.get(`/airport/findmy?page=${encode(page)}&pagesize=${encode(pageSize)}`),
         FindRunningAirport: (page, pageSize) => requests.get(`/airport/findrunning?page=${encode(page)}&pagesize=${encode(pageSize)}`),
         FindFinishAirport: (page, pageSize) => requests.get(`/airport/findfinish?page=${encode(page)}&pagesize=${encode(pageSize)}`)

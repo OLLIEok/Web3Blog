@@ -128,39 +128,69 @@ export const DiscoverWalletProviders = () => {
             setSearchWalletModal(!searchWalletModal);
         }
     }, [searchWalletModal]);
+    
     return (
-        providers.length > 0 &&
-        <Modal
-            className={"rounded-xl"}
-            width={"40%"} closable={false} keyboard footer={null} open={searchWalletModal}
-            onCancel={() => setSearchWalletModal(!searchWalletModal)}>
-            <div className={"w-full h-24 flex justify-center items-center flex-col"}>
-                <motion.div animate={{ x: 80, transition: { duration: 1 } }}
-                    className={" w-full flex justify-start font-serif   items-start flex-col"}>
-                    <div className={"w-full lg:text-3xl align-middle font-serif text-wrap text-2xl"}>
-                        欢迎来到
-                    </div>
-                    <div
-                        className={"w-full align-middle font-serif pl-20 lg:text-3xl text-2xl"}>0xdoomxy的小世界
-                    </div>
-                </motion.div>
-            </div>
-            <div className={"flex justify-center items-center flex-col"}>{providers?.map((provider) => (
-                <motion.button key={provider.info.name} style={{ width: "100%", height: "100%" }} className={"w-full h-full  my-1 motion-button"} onClick={() => handleConnect(provider)}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}>
-                    <div className={" flex pl-2 justify-start items-center"}>
-                        <img src={provider.info.icon} style={{ width: "40px", height: "40px" }}
-                            alt={provider.info.name} />
-                        <div className={"pl-4"} style={{
-                            fontSize: "16px",
-                            color: "#222222",
-                            fontFamily: "Basel,sans-serif"
-                        }}>{provider.info.name}</div>
+    providers.length > 0 &&
+    <Modal
+        className={"rounded-xl"}  
+        // width={"30%"}  
+        closable={false}  
+        keyboard  
+        footer={null}  
+        open={searchWalletModal}  
+        onCancel={() => setSearchWalletModal(!searchWalletModal)} 
+    >
+        <div className={"w-full h-24 flex justify-center items-center flex-col"}>
+            <motion.div
+                animate={{ x: 60, transition: { duration: 1 } }}  
+                className={"w-full flex justify-start font-serif items-start flex-col"}
+            >
+                <div  className={"w-full lg:text-2xl text-xl font-serif text-wrap "}>
+                    欢迎来到
+                </div>
+                <div
+                    className={"w-full font-serif pl-14 lg:text-2xl text-xl text-wrap"}
+                >
+                    0xdoomxy的小世界
+                </div>
+            </motion.div>
+        </div>
+
+        {/* 钱包提供商按钮列表 */}
+        <div className={"flex justify-center items-center flex-col"}>
+            {providers?.map((provider) => (
+                <motion.button
+                    key={provider.info.name}  
+                    style={{ width: "100%", height: "50px", borderRadius: "8px" }}  
+                    className={"w-full h-full my-2 bg-white shadow-none transition-all duration-200 ease-in-out"}  
+                    onClick={() => handleConnect(provider)}  
+                    whileHover={{ 
+                        scale: 1.05, 
+                        boxShadow: "0 4px 16px rgba(53, 49, 49, 0.3)"  // 透明度 0.4
+                    }}  
+                    whileTap={{ scale: 0.95 }}  // 按钮点击时缩小 5%
+                >
+                    <div className={"flex pl-2 justify-start items-center"}>
+      
+                        <img
+                            src={provider.info.icon}
+                            style={{ width: "40px", height: "40px" }}
+                            alt={provider.info.name}
+                        />
+                        <div
+                            className={"pl-4"}
+                            style={{
+                                fontSize: "16px",
+                                color: "#222222",  
+                                fontFamily: "Basel,sans-serif"  
+                            }}
+                        >
+                            {provider.info.name}  
+                        </div>
                     </div>
                 </motion.button>
-            ))}</div>
-        </Modal>
-
-    )
+            ))}
+        </div>
+    </Modal>
+)
 }

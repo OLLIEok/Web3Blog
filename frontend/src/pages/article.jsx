@@ -79,7 +79,7 @@ const ArticlePage = () => {
                         <Comment
                             actions={[(
                                 <div className=" w-full flex flex-col justify-center"><span
-                                    key="comment-nested-reply-to" className="w-full cursor-pointer mb-2"
+                                    key="comment-nested-reply-to" className="w-full cursor-pointer mb-1 text-sm"
                                     onClick={() => setIsOpen(item.data.ID)}>回复</span>{isOpen === item.data.ID &&
                                     <CustomerComment topID={item.data.ID} setIsOpen={setIsOpen} articleId={articleId}
                                                      key={"sub_comment_" + index} callBack={(data) => {
@@ -312,13 +312,13 @@ const ArticlePage = () => {
                                  id={article.creator}>{article.creator_name}</div>
                             <div className=" text-base font-sans text-xl lg:text-2xl ">{article.create_time}</div>
                         </div>
-                        <div className="w-1/4 h-48 flex justify-center flex-col">
+                        <div className="w-1/4  flex justify-center flex-col ml-10">
                             <div
                                 style={{
                                     color: "#222222",
                                     fontFamily: "Basel,sans-serif"
                                 }}
-                                className="h-1/2 border-x-2 border-t-2 text-md  md:text-xl  w-full  font-serif flex items-center justify-center">
+                                className="h-1/2 p-2  border-x-2 border-t-2 text-sm sm:text-base  md:text-xl  w-full  font-serif flex items-center justify-center">
                                 浏览量:{article.access_num}
                             </div>
                             <div
@@ -326,7 +326,7 @@ const ArticlePage = () => {
                                     color: "#222222",
                                     fontFamily: "Basel,sans-serif"
                                 }}
-                                className=" h-1/2 border-2 w-full text-md  md:text-xl  font-serif flex items-center justify-center">
+                                className=" h-1/2 p-2 border-2 w-full text-sm sm:text-base  md:text-xl  font-serif flex items-center justify-center">
                                 点赞量:{article.like_num}
                             </div>
                         </div>
@@ -336,10 +336,29 @@ const ArticlePage = () => {
                     </div>
                     <div className=" w-full pt-24 pb-4 flex justify-end  ">
                         {!userAccount? <div className="w-1/3 flex justify-end items-center  ">
-                            <motion.button
-                                style={{width: "150px", height: " 60px"}} whileHover={{scale: 1.1}}
-                                whileTap={{scale: 0.95}} className={"motion-button"}
-                                    onClick={() => setSearchWalletModal(!searchWalletModal)}>Connect Wallet</motion.button>
+                            <motion.div
+                                            whileHover={{ scale: 1.1 }} // Hover时放大
+                                            whileTap={{ scale: 0.95 }}  // 点击时缩小
+                                            transition={{ duration: 0.3 }} 
+                                        >
+                                            <Button
+                                                type="primary"
+                                                style={{
+                                                    width: '140px',
+                                                    height: '60px',
+                                                    borderRadius: '30px',  
+                                                    backgroundColor: '#333', 
+                                                    color: '#fff',           
+                                                    border: 'none',          
+                                                    fontWeight: 'bold',      
+                                                }}
+                                                onClick={() => {
+                                                    setSearchWalletModal(!searchWalletModal);
+                                                }}
+                                            >
+                                                Connect Wallet
+                                            </Button>
+                                        </motion.div>
                         </div> : <div className=" w-1/3 flex flex-row justify-end items-center">
                             <div className=" px-2 cursor-pointer ">
                                 {!article.isLike ? <svg onClick={() => {
