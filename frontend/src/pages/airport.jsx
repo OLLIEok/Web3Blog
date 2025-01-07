@@ -1,17 +1,24 @@
 import {Header, RunningAirport, FinishAirport, MyAirport} from "../components";
 import {AnimatePresence, motion} from "framer-motion";
-import React, {useContext, useEffect, useState} from 'react';
+import React, { useContext, useEffect, useState} from 'react';
 import "../css/airport.css";
 import {ClockCircleFilled, PlusSquareFilled, WalletFilled} from "@ant-design/icons";
-import { HttpAgent } from "../agent/agent";
-
+import { Web3Wallet } from "../App";
 
 const AirPort = () => {
+    const {userAccount} = useContext(Web3Wallet);
     const [tabs,setTabs] = useState( [
-        {icon:<WalletFilled height={10} width={10}/>,label:"我的空投",content: <MyAirport />},
         {icon:<PlusSquareFilled  height={10} width={10}/>, label: "发现空投",content:<RunningAirport />},
         {icon: <ClockCircleFilled  height={10} width={10} />, label: "已结束的空投",content:<FinishAirport />},
     ]);
+    useEffect(()=>{
+        if (userAccount&& tabs.length<=2){
+            setTabs((pre)=>[
+                {icon:<WalletFilled height={10} width={10}/>,label:"我的空投",content: <MyAirport />}].concat(pre))
+        }else if (!userAccount && tabs.length>=3 ){
+            setTabs((pre)=>pre.slice(1))
+        }
+    },[userAccount])
     const [selectedTab, setSelectedTab] = useState(tabs[1]);
     return (
         <div className={"w-full h-full flex justify-center items-start"}>

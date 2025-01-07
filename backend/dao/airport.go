@@ -97,7 +97,71 @@ type AirportPagedView struct {
 	Total int64            `json:"total"`
 }
 
-func (a *airport) QueryRunningAirportWithWeightByPage(ctx context.Context, address string, page int, pageSize int) (res *AirportPagedView, err error) {
+func (a *airport) QueryRunningAirportOrderWeightByPage(ctx context.Context, page int, pageSize int) (res *AirportPagedView, err error) {
+	storage := db.GetMysql()
+	var raw any
+	raw, err, _ = a.sf.Do(
+		fmt.Sprintf("running_%d_%d", page, pageSize),
+		func() (interface{}, error) {
+			var closureRes = new(AirportPagedView)
+			var closureTotal int64
+			var closureErr error
+			closureErr = storage.WithContext(ctx).Raw(`
+	SELECT
+		count(*) as total
+	FROM
+		airport AS a `).Row().Scan(&closureTotal)
+			if closureErr != nil {
+				return closureRes, closureErr
+			}
+			closureRes.Total = closureTotal
+			var closureData []*model.Airport
+			var closureRaw *sql.Rows
+			closureRaw, closureErr = storage.WithContext(ctx).Raw(`SELECT
+		a.id AS id,
+		a.name AS name,
+		a.start_time AS start_time,
+		a.end_time AS end_time,
+		a.final_time AS final_time,
+		a.address AS address,
+		a.tag AS tag,
+		a.financing_balance AS financing_balance,
+		a.financing_from AS financing_from,
+		a.task_type AS task_type,
+		a.airport_balance AS airport_balance,
+		a.teaching AS teaching,
+		a.weight AS weight
+	FROM
+		airport AS a 
+	where a.end_time is null or a.end_time > NOW()
+	ORDER BY a.weight desc
+	LIMIT ?  offset ?`, pageSize, (page-1)*pageSize).Rows()
+			if closureErr != nil {
+				return closureData, closureErr
+			}
+			for closureRaw.Next() {
+				var tmp = new(model.Airport)
+				if closureData == nil {
+					closureData = make([]*model.Airport, 0)
+				}
+				closureErr = storage.ScanRows(closureRaw, tmp)
+				if closureErr != nil {
+					return closureRes, closureErr
+				}
+				closureData = append(closureData, tmp)
+			}
+			closureRes.Data = closureData
+			return closureRes, closureErr
+		},
+	)
+	if err != nil {
+		logrus.Errorf("query running airport (page:%d,pagesize:%d) with weight by page error:%s ", page, pageSize, err.Error())
+		return
+	}
+	return raw.(*AirportPagedView), err
+}
+
+func (a *airport) QueryRunningAirportWithAddressOrderWeightByPage(ctx context.Context, address string, page int, pageSize int) (res *AirportPagedView, err error) {
 	storage := db.GetMysql()
 	var raw any
 	raw, err, _ = a.sf.Do(

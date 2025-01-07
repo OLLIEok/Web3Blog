@@ -25,7 +25,10 @@ func (a *airport) QueryFinishAirportWithFinishTimeByPage(ctx context.Context, pa
 	return dao.GetAirport().QueryFinishAirportWithFinishTimeByPage(ctx, page, pageSize)
 }
 func (a *airport) QueryRunningAirportWithWeightByPage(ctx context.Context, address string, page int, pageSize int) (*dao.AirportPagedView, error) {
-	return dao.GetAirport().QueryRunningAirportWithWeightByPage(ctx, address, page, pageSize)
+	if address != "" {
+		dao.GetAirport().QueryRunningAirportWithAddressOrderWeightByPage(ctx, address, page, pageSize)
+	}
+	return dao.GetAirport().QueryRunningAirportOrderWeightByPage(ctx, page, pageSize)
 }
 
 func (a *airport) QueryMyAirportByPage(ctx context.Context, address string, page int, pageSize int) (res *dao.MyAirportPagedView, err error) {

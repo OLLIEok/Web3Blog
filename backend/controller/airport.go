@@ -46,14 +46,12 @@ func (a *airport) FindRunningAirport(c *gin.Context) {
 	var ok bool
 	var addressAny any
 	addressAny, ok = c.Get("address")
-	if !ok {
-		c.JSON(http.StatusOK, utils.NewFailedResponse("参数出错"))
-		return
-	}
 	var address string
-	if address, ok = addressAny.(string); !ok {
-		c.JSON(http.StatusOK, utils.NewFailedResponse("参数出错"))
-		return
+	if ok {
+		if address, ok = addressAny.(string); !ok {
+			c.JSON(http.StatusOK, utils.NewFailedResponse("参数出错"))
+			return
+		}
 	}
 	page, err := strconv.ParseInt(c.Query("page"), 10, 64)
 	if err != nil || page <= 0 {

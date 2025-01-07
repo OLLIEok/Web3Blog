@@ -62,10 +62,10 @@ func bindMessageRoutes(engine *gin.Engine) {
 }
 func bindAirportRoutes(engine *gin.Engine) {
 	route := engine.Group("/airport")
-	route.GET("/findrunning", jwt.NewVerifyMiddleware(), func(ctx *gin.Context) {
+	route.GET("/findrunning", func(ctx *gin.Context) {
 		controller.GetAirport().FindRunningAirport(ctx)
 	})
-	route.GET("/findfinish", jwt.NewVerifyMiddleware(), func(ctx *gin.Context) {
+	route.GET("/findfinish", func(ctx *gin.Context) {
 		controller.GetAirport().FindFinishAirport(ctx)
 	})
 	route.GET("/findmy", jwt.NewVerifyMiddleware(), func(ctx *gin.Context) {
