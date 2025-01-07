@@ -8,8 +8,7 @@ import { DiscoverWalletProviders } from '../components/WalletProviders';
 const superagent = superagentPromise(_superagent, Promise);
 
 const localStorageKey = 'blog-auth-token';
-// const API_ROOT ="https://www.0xdoomxy.top/blog";
-const API_ROOT ="http://localhost:8080";
+const API_ROOT ="https://www.0xdoomxy.top/blog";
 // const SetAuthorizetion = (token) =>{
 //     superagent('Authorization',`Bearer ${token}`);
 // }
