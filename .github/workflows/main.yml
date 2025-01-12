@@ -3,8 +3,7 @@ on:
     branches:
       - main
     paths:
-      - 'deployment/**'
-      - 'backend/**'  
+      - 'apps/website/**'  
 
 jobs:
   build-and-deploy:
