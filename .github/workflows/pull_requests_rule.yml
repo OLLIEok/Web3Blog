@@ -6,8 +6,8 @@ on:
       - main
     paths:
       - 'frontend/**'  
-      - 'backend/**'  
-      - 'deployment/**'
+      - 'deployment/**'  
+      - 'apps/website/**'
 
 jobs:
   build-and-deploy:
