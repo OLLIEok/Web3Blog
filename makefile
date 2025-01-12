@@ -1,7 +1,7 @@
 
 DOCKER_COMPOSE_FILE = docker-compose.yaml
 DOCKER_IMAGE = deployment_backend:latest
-BACKEND_DIR = backend
+BACKEND_DIR = apps/website
 FRONTEND_DIR = frontend
 DEPLOYMENT_DIR =deployment
 
