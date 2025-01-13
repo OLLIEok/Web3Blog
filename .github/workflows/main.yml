@@ -27,7 +27,7 @@ jobs:
           go-version: '1.22.1'
 
       - name: Build Backend
-        working-directory: backend
+        working-directory: apps/website
         run: |
           go build -ldflags="-s -w" .
 
