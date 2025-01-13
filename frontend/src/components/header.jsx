@@ -12,7 +12,7 @@ import {Web3Wallet} from "../App";
 import {motion} from "framer-motion";
 import Avatar from "./avatar.jsx";
 import { HttpAgent } from '../agent/agent.jsx';
-
+import Notifications from "./Notifications";
 const Header = () => {
     const {
         searchWalletModal,
@@ -238,6 +238,7 @@ const Header = () => {
                             </div>
                         </div>
                     </div>
+                    <Notifications/>
                     <div
                         className=" hidden md:flex w-1/8 justify-evenly ">{userAccount != null && userAccount.length > 0 ?
                         <Avatar/> :

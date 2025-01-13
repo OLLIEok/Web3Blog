@@ -89,6 +89,7 @@ const ArticlePage = () => {
                                         } else {
                                             children.push(data);
                                         }
+                                        searchCommentByArticle();
                                     }}/>}</div>
                             )]}
                             author={<a>{item.data.Creator}</a>}
@@ -250,6 +251,7 @@ const ArticlePage = () => {
                 }
         }
     }, [userAccount])
+    
     //组件初始化的时候执行的函数
     useEffect(() => {
         //初始化文章信息
