@@ -37,6 +37,12 @@ func (m *manager) Run() (err error) {
 		return
 	}
 	logrus.Infof("Success  registe airport cron job :%d", airportJob)
+	var imageJob cron.EntryID
+	imageJob, err = m.c.AddFunc("0 0 1 * *", NewImageCronTask())
+	if err != nil {
+		return
+	}
+	logrus.Infof("Success registe image cron job :%d", imageJob)
 	go m.c.Run()
 	// run self task which cant be managed by cron.Cron
 	m.runSelfTask()
