@@ -43,20 +43,37 @@ func (m *message) CreateMessages(ctx context.Context, datas []*model.Message) (e
 	}
 	return
 }
-func (m *message) FindMessageByAddress(ctx context.Context, address string, page int, pagesize int) (res []*model.Message, err error) {
+
+type AddressMessageTemplate struct {
+	Data  []*model.Message
+	Total uint64
+}
+
+func (m *message) FindMessageByAddress(ctx context.Context, address string, page int, pagesize int) (res *AddressMessageTemplate, err error) {
 	var raw any
 	raw, err, _ = m.sf.Do(fmt.Sprintf("message_%s_%d_%d", address, page, pagesize), func() (interface{}, error) {
-		var closureRes []*model.Message
+		var data []*model.Message
 		var closureError error
+		var total uint64
 		storage := db.GetMysql()
-		closureError = storage.Model(&model.Message{}).WithContext(ctx).Where("address = ?", address).Order("create_time desc,has_reply asc").Offset((page - 1) * pagesize).Limit(pagesize).Find(&closureRes).Error
-		return closureRes, closureError
+		closureError = storage.Model(&model.Message{}).WithContext(ctx).Select("count(*) as total").Where("address = ?", address).Find(&total).Error
+		if closureError != nil {
+			return nil, closureError
+		}
+		closureError = storage.Model(&model.Message{}).WithContext(ctx).Where("address = ?", address).Order("create_time desc,has_reply asc").Offset((page - 1) * pagesize).Limit(pagesize).Find(&data).Error
+		if closureError != nil {
+			return nil, closureError
+		}
+		return &AddressMessageTemplate{
+			Data:  data,
+			Total: total,
+		}, nil
 	})
 	if err != nil {
 		logrus.Errorf("find message by address (address:%s,page:%d,pagesize:%d) error:%s", address, page, pagesize, err.Error())
 		return
 	}
-	return raw.([]*model.Message), err
+	return raw.(*AddressMessageTemplate), err
 }
 func (m *message) FindMessageByid(ctx context.Context, id uint64) (res *model.Message, err error) {
 	var raw any
@@ -88,7 +105,7 @@ func (m *message) FindMessageByid(ctx context.Context, id uint64) (res *model.Me
 }
 func (m *message) UpdateMessageById(ctx context.Context, msg *model.Message) (err error) {
 	storage := db.GetMysql()
-	err = storage.Model(&model.Message{}).Where("id = ?", msg.Id).Updates(msg).Error
+	err = storage.WithContext(ctx).Model(&model.Message{}).Where("id = ?", msg.Id).Updates(msg).Error
 	if err != nil {
 		logrus.Errorf("update message (%v)  from mysql failed: %s", msg, err.Error())
 	}
@@ -104,7 +121,7 @@ func (m *message) UpdateMessageById(ctx context.Context, msg *model.Message) (er
 func (m *message) FindTotalUnreadMessageByAddress(ctx context.Context, address string) (total uint64, err error) {
 	_, err, _ = m.sf.Do(fmt.Sprintf("total_%s", address), func() (interface{}, error) {
 		storage := db.GetMysql()
-		return nil, storage.Model(&model.Message{}).Select("count(*) as total").Where("address = ? and has_reply = 0 ", address).Find(&total).Error
+		return nil, storage.WithContext(ctx).Model(&model.Message{}).Select("count(*) as total").Where("address = ? and has_reply = 0 ", address).Find(&total).Error
 	})
 	if err != nil {
 		logrus.Errorf("find total unread message by address(%s) failed:%s ", address, err.Error())

@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"blog/model"
+	"blog/dao"
 	"blog/service"
 	"blog/utils"
 	"net/http"
@@ -37,7 +37,7 @@ func (m *message) QueryMessageByPage(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, utils.NewFailedResponse("参数错误"))
 		return
 	}
-	var res []*model.Message
+	var res *dao.AddressMessageTemplate
 	res, err = service.GetMessage().FindMessageByAddress(ctx, address.(string), page, pageSize)
 	if err != nil {
 		ctx.JSON(http.StatusOK, utils.NewFailedResponse("查询失败"))
