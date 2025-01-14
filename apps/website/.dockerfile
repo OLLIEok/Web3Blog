@@ -5,11 +5,7 @@ WORKDIR /app
 COPY . .
 
 ENV GOPROXY=https://goproxy.cn,direct
-ENV GO111MODULE=on
-ENV GOOS=linux
-ENV CGO_ENABLED = 0
-ENV GIN_MODE=release
-RUN go build -o blog -ldflags="-s -w" .
+RUN GIN_MODE=release GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o blog -ldflags="-s -w" .
 
 
 FROM alpine
@@ -21,12 +17,14 @@ RUN echo "http://mirrors.aliyun.com/alpine/v3.17/main" > /etc/apk/repositories &
     apk update && \
     apk add --no-cache tzdata
 
+WORKDIR /website
+
 RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
     echo "Asia/Shanghai" > /etc/timezone
 
-COPY --from=builder /app/blog /blog
+COPY --from=builder /app/blog ./blog
 RUN chmod u+x ./blog
-COPY --from=builder /app/config/*.yaml /config/
+COPY --from=builder /app/config/*.yaml ./config/
 
 EXPOSE 8080
 

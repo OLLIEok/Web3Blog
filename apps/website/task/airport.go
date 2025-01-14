@@ -15,7 +15,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func newAirportCronJob() func() {
+func NewAirportCronJob() func() {
 	var onceExec = make(chan struct{}, 1)
 	onceExec <- struct{}{}
 	return func() {

@@ -59,6 +59,12 @@ func bindMessageRoutes(engine *gin.Engine) {
 	route.GET("/query", jwt.NewVerifyMiddleware(), func(ctx *gin.Context) {
 		controller.GetMessage().QueryMessageByPage(ctx)
 	})
+	route.GET("/read", jwt.NewVerifyMiddleware(), func(ctx *gin.Context) {
+		controller.GetMessage().ReadMessage(ctx)
+	})
+	route.GET("/utotal", jwt.NewVerifyMiddleware(), func(ctx *gin.Context) {
+		controller.GetMessage().FindTotalUnreadMessage(ctx)
+	})
 }
 func bindAirportRoutes(engine *gin.Engine) {
 	route := engine.Group("/airport")

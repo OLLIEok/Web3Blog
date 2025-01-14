@@ -14,7 +14,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func newLikeCronJob() func() {
+func NewLikeCronJob() func() {
 	var onceExec = make(chan struct{}, 1)
 	var m = make(map[uint64]uint64)
 	onceExec <- struct{}{}

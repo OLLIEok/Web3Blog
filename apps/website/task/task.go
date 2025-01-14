@@ -26,13 +26,13 @@ func (m *manager) Run() (err error) {
 		m.c = cron.New()
 	}
 	var likeJob cron.EntryID
-	likeJob, err = m.c.AddFunc("*/2 * * * *", newLikeCronJob())
+	likeJob, err = m.c.AddFunc("*/2 * * * *", NewLikeCronJob())
 	if err != nil {
 		return
 	}
 	logrus.Infof("Success  registe like cron job :%d", likeJob)
 	var airportJob cron.EntryID
-	airportJob, err = m.c.AddFunc("0 0 * * *", newAirportCronJob())
+	airportJob, err = m.c.AddFunc("0 0 * * *", NewAirportCronJob())
 	if err != nil {
 		return
 	}
