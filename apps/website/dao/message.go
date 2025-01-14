@@ -4,8 +4,11 @@ import (
 	"blog/dao/db"
 	"blog/model"
 	"context"
+	"errors"
 	"fmt"
+	"time"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/sync/singleflight"
 )
@@ -54,4 +57,57 @@ func (m *message) FindMessageByAddress(ctx context.Context, address string, page
 		return
 	}
 	return raw.([]*model.Message), err
+}
+func (m *message) FindMessageByid(ctx context.Context, id uint64) (res *model.Message, err error) {
+	var raw any
+	raw, err, _ = m.sf.Do(fmt.Sprintf("message_%d", id), func() (interface{}, error) {
+		var closureRes = new(model.Message)
+		var closureError error
+		cache := db.GetRedis()
+		key := fmt.Sprintf("%s_%d", res.TableName(), id)
+		closureError = cache.Get(ctx, key).Scan(closureRes)
+		if closureError == nil || !errors.Is(closureError, redis.Nil) {
+			if closureError != nil {
+				logrus.Errorf("find message (key = %s) by redis failed:%s", key, err.Error())
+			}
+			return closureRes, closureError
+		}
+		storage := db.GetMysql()
+		closureError = storage.Model(&model.Message{}).WithContext(ctx).Where("id = ?", id).Find(closureRes).Error
+		ignoreErr := cache.Set(ctx, key, closureRes, 5*time.Minute).Err()
+		if ignoreErr != nil {
+			logrus.Errorf("Set redis message (%v) cache failed:%s", closureRes, ignoreErr.Error())
+		}
+		return closureRes, closureError
+	})
+	if err != nil {
+		logrus.Errorf("find message (id = %d) from mysql failed:%s", id, err.Error())
+		return
+	}
+	return raw.(*model.Message), err
+}
+func (m *message) UpdateMessageById(ctx context.Context, msg *model.Message) (err error) {
+	storage := db.GetMysql()
+	err = storage.Model(&model.Message{}).Where("id = ?", msg.Id).Updates(msg).Error
+	if err != nil {
+		logrus.Errorf("update message (%v)  from mysql failed: %s", msg, err.Error())
+	}
+	cache := db.GetRedis()
+	key := fmt.Sprintf("%s_%d", msg.TableName(), msg.Id)
+	ignoreErr := cache.Del(ctx, key).Err()
+	if ignoreErr != nil && !errors.Is(ignoreErr, redis.Nil) {
+		logrus.Errorf("delete message (%d) from redis when mysql update error:%s", msg.Id, ignoreErr.Error())
+	}
+	return
+}
+
+func (m *message) FindTotalUnreadMessageByAddress(ctx context.Context, address string) (total uint64, err error) {
+	_, err, _ = m.sf.Do(fmt.Sprintf("total_%s", address), func() (interface{}, error) {
+		storage := db.GetMysql()
+		return nil, storage.Model(&model.Message{}).Select("count(*) as total").Where("address = ? and has_reply = 0 ", address).Find(&total).Error
+	})
+	if err != nil {
+		logrus.Errorf("find total unread message by address(%s) failed:%s ", address, err.Error())
+	}
+	return
 }
