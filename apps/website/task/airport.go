@@ -1,6 +1,7 @@
 package task
 
 import (
+	collection "blog/const"
 	"blog/dao"
 	"blog/dao/db"
 	"blog/model"
@@ -64,11 +65,12 @@ func NewAirportCronJob() func() {
 				var messages = make([]*model.Message, 0, len(relationAirports))
 				for _, ra := range relationAirports {
 					messages = append(messages, &model.Message{
-						Ds:         curDs,
-						Address:    ra.UserAddress,
-						AirportId:  ra.AirportId,
-						CreateTime: time.Now(),
-						Content:    fmt.Sprintf("%s:您有一个空投%s需要完成", utils.FormatDs(curDs), a.Name),
+						Ds:          curDs,
+						Address:     ra.UserAddress,
+						MessageType: collection.AIRPORT,
+						RelativeId:  ra.AirportId,
+						CreateTime:  time.Now(),
+						Content:     fmt.Sprintf("%s:您有一个空投%s需要完成", utils.FormatDs(curDs), a.Name),
 					})
 				}
 				perr = dao.GetMessage().CreateMessages(context.TODO(), messages)
