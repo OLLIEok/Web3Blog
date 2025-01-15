@@ -14,9 +14,11 @@ var db *gorm.DB
 
 func init() {
 	var err error
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True", viper.GetString("mysql.username"), viper.GetString("mysql.password"), viper.GetString("mysql.host"), viper.GetInt("mysql.port"), viper.GetString("mysql.database"))
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", viper.GetString("mysql.username"), viper.GetString("mysql.password"), viper.GetString("mysql.host"), viper.GetInt("mysql.port"), viper.GetString("mysql.database"))
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
-		PrepareStmt: true,
+		PrepareStmt:                              true,
+		SkipDefaultTransaction:                   true,
+		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 	if err != nil {
 		logrus.Panicf("connect to mysql %s failed: %s", dsn, err.Error())

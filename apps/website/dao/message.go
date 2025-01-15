@@ -81,7 +81,7 @@ func (m *message) FindMessageByid(ctx context.Context, id uint64) (res *model.Me
 		var closureRes = new(model.Message)
 		var closureError error
 		cache := db.GetRedis()
-		key := fmt.Sprintf("%s_%d", res.TableName(), id)
+		key := fmt.Sprintf("%s_%d", _m.TableName(), id)
 		closureError = cache.Get(ctx, key).Scan(closureRes)
 		if closureError == nil || !errors.Is(closureError, redis.Nil) {
 			if closureError != nil {
@@ -110,7 +110,7 @@ func (m *message) UpdateMessageById(ctx context.Context, msg *model.Message) (er
 		logrus.Errorf("update message (%v)  from mysql failed: %s", msg, err.Error())
 	}
 	cache := db.GetRedis()
-	key := fmt.Sprintf("%s_%d", msg.TableName(), msg.Id)
+	key := fmt.Sprintf("%s_%d", _m.TableName(), msg.Id)
 	ignoreErr := cache.Del(ctx, key).Err()
 	if ignoreErr != nil && !errors.Is(ignoreErr, redis.Nil) {
 		logrus.Errorf("delete message (%d) from redis when mysql update error:%s", msg.Id, ignoreErr.Error())
@@ -128,3 +128,5 @@ func (m *message) FindTotalUnreadMessageByAddress(ctx context.Context, address s
 	}
 	return
 }
+
+var _m = model.Message{}
