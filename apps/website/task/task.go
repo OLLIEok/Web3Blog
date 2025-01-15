@@ -26,7 +26,7 @@ func (m *manager) Run() (err error) {
 		m.c = cron.New()
 	}
 	var likeJob cron.EntryID
-	likeJob, err = m.c.AddFunc("*/2 * * * *", NewLikeCronJob())
+	likeJob, err = m.c.AddFunc("*/30 * * * *", NewLikeCronJob())
 	if err != nil {
 		return
 	}

@@ -62,7 +62,7 @@ func init() {
 	accessDao.cacheKey = _acc.TableName()
 	go func() {
 		// flush the access cache to rabbitmq
-		ticker := time.NewTicker(2 * time.Minute)
+		ticker := time.NewTicker(30 * time.Minute)
 		sigs := make(chan os.Signal, 1)
 		signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 		for {
