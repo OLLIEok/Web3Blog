@@ -238,7 +238,9 @@ const Header = () => {
                             </div>
                         </div>
                     </div>
-                    <Notifications/>
+                    <div
+                        className=" hidden md:flex w-1/8 ">
+                    <Notifications/></div>
                     <div
                         className=" hidden md:flex w-1/8 justify-evenly ">{userAccount != null && userAccount.length > 0 ?
                         <Avatar/> :
@@ -292,7 +294,11 @@ const Header = () => {
                     }}/>
                 </div>
                 <div ref={scope} className=" flex  md:pr-4 lg:pl-12  justify-center items-center  w-1/3 md:hidden ">
+                <Notifications/>
                     <nav className="menu">
+                    {/* {userAccount != null && userAccount.length > 0 ? 
+                    <div className='flex items-center justify-center'>                 
+                    <Avatar/> </div>  : null} */}
                         <ul className={"flex items-center justify-center flex-col"}>
                             {navItems.map((item, index) => (
                                 <li onClick={() => {
