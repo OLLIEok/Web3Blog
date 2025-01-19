@@ -50,7 +50,6 @@ func NewLikeCronJob() func() {
 				if err != nil {
 					return
 				}
-
 				articleidStr, found = strings.CutPrefix(key, fmt.Sprintf("%s_", dao.GetLikePreifxKey()))
 				if !found {
 					return
@@ -61,7 +60,6 @@ func NewLikeCronJob() func() {
 					return
 				}
 				if old, ok := m[articleid]; !ok || (ok && old < likenum) {
-
 					err = db.GetMysql().Model(&model.Like{}).Where("article_id = ?", articleid).Update("like_num", likenum).Error
 					if err != nil {
 						logrus.Errorf("update like num (articleid:%d,likenum:%d) failed: %s", articleid, likenum, err.Error())
