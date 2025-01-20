@@ -60,7 +60,7 @@ func (m *message) FindMessageByAddress(ctx context.Context, address string, page
 		if closureError != nil {
 			return nil, closureError
 		}
-		closureError = storage.Model(&model.Message{}).WithContext(ctx).Where("address = ?", address).Order("create_time desc,has_reply asc").Offset((page - 1) * pagesize).Limit(pagesize).Find(&data).Error
+		closureError = storage.Model(&model.Message{}).WithContext(ctx).Where("address = ?", address).Order("has_reply asc,create_time desc").Offset((page - 1) * pagesize).Limit(pagesize).Find(&data).Error
 		if closureError != nil {
 			return nil, closureError
 		}
