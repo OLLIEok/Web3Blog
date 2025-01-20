@@ -288,12 +288,12 @@ func (a *airport) QueryMyAirportWithUpdateByPage(ctx context.Context, address st
 		var closureData []*MyAirportView
 		var closureErr error
 		var closureTotal int64
-		closureErr = storage.WithContext(ctx).Model(&model.Airport{}).Select("count(*) as total ").Joins("left join airport_relationship as ar on ar.delete_time is null and airport.id = ar.airport_id ").Where("ar.airport_id is not null").Find(&closureTotal).Error
+		closureErr = storage.WithContext(ctx).Model(&model.Airport{}).Select("count(*) as total ").Joins("left join airport_relationship as ar on ar.user_address = ? and  ar.delete_time is null and airport.id = ar.airport_id ", address).Where("ar.airport_id is not null").Find(&closureTotal).Error
 		if closureErr != nil {
 			return closureRes, closureErr
 		}
 		closureRes.Total = closureTotal
-		closureErr = storage.WithContext(ctx).Model(&model.Airport{}).Select("airport.*,ar.balance as user_balance,ar.update_time as user_update_time,ar.finish_time as user_finish_time").Joins("left join airport_relationship as ar on ar.delete_time is null and airport.id = ar.airport_id ").Where("ar.airport_id is not null").Offset((page - 1) * pageSize).Limit(pageSize).Order("ar.update_time,ar.finish_time").Find(&closureData).Error
+		closureErr = storage.WithContext(ctx).Model(&model.Airport{}).Select("airport.*,ar.balance as user_balance,ar.update_time as user_update_time,ar.finish_time as user_finish_time").Joins("left join airport_relationship as ar on ar.user_address = ? and ar.delete_time is null and airport.id = ar.airport_id ", address).Where("ar.airport_id is not null").Offset((page - 1) * pageSize).Limit(pageSize).Order("ar.update_time,ar.finish_time").Find(&closureData).Error
 		if closureErr != nil {
 			return closureRes, closureErr
 		}
