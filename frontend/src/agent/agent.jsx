@@ -9,6 +9,7 @@ const superagent = superagentPromise(_superagent, Promise);
 
 const localStorageKey = 'blog-auth-token';
 const API_ROOT ="https://www.0xdoomxy.top/blog";
+
 // const SetAuthorizetion = (token) =>{
 //     superagent('Authorization',`Bearer ${token}`);
 // }
@@ -126,11 +127,17 @@ export default function Agent({setSearchWalletModal,selectedWallet,userAccount})
 
     }
 
+    const MessageClient = {
+        GetTotal: () => requests.get(`/message/utotal`),
+        Read: (messageId) => requests.get(`/message/read?id=${encode(messageId)}`),
+        FindAllMessage: (page, pagesize) => requests.get(`/message/query?page=${encode(page)}&pagesize=${encode(pagesize)}`)
+    }
+
     const UserClient = {
         Login: (signs) => requests.post(`/user/login`, signs)
     }
     return (
-        <HttpAgent.Provider value={{isAdmin,SetIsAdmin,AirportClient, CommentClient, Authorization, SetAuthorization, UserClient, LikeClient, ArticleClient, TagClient, API_ROOT }}>
+        <HttpAgent.Provider value={{isAdmin,SetIsAdmin,AirportClient, CommentClient, Authorization, SetAuthorization, UserClient, LikeClient, ArticleClient, TagClient,MessageClient, API_ROOT }}>
             
             <DiscoverWalletProviders />
             <Router>

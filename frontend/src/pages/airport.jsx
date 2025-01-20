@@ -19,7 +19,7 @@ const AirPort = () => {
             setTabs((pre)=>pre.slice(1))
         }
     },[userAccount])
-    const [selectedTab, setSelectedTab] = useState(tabs[1]);
+    const [selectedTab, setSelectedTab] = useState(tabs[0]);
     return (
         <div className={"w-full h-full flex justify-center items-start"}>
             <Header/>

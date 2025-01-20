@@ -21,39 +21,45 @@ const EditableRow = ({index, ...props}) => {
     );
 };
 
-const ObtainAirportStatus = (item)=>{
-    const now = Date.now();
-    const airport_start_time = new Date(item.start_time).getTime();
-    const airport_end_time = new Date(item.end_time).getTime();
-    if (airport_start_time>now){
-        item.status = AirportStatus.UnStart;
-    }else if(!airport_end_time || now < airport_end_time ){
-        if (!item.user_update_time){
-            item.status= AirportStatus.UnFinishToday;
-        }else{
-        const airport_user_update_time =new Date(item.user_update_time).getTime();
-        if (!isToday(airport_user_update_time)){
-            item.status= AirportStatus.UnFinishToday;
-        }else{
-            item.status = AirportStatus.Running;
-        }
-    }
-    }else {
-        let airport_user_finish_time =now;
-        if (item.user_finish_time){
-            airport_user_finish_time = new Date(item.user_finish_time).getTime();
-        }
-            if (airport_end_time<airport_user_finish_time){
-                    item.status =AirportStatus.Expire;
-            }else if (item.user_finish_time){
-                    item.status =AirportStatus.SuccessObtain;
-            }else{
-                item.status =AirportStatus.NeedToObtain;
-            }
-        
-    }
-    return item;
-}
+const ObtainAirportStatus = (item) => {
+  const now = Date.now();
+  const airport_start_time = item.start_time ? new Date(item.start_time).getTime() : null;
+  const airport_end_time = item.end_time ? new Date(item.end_time).getTime() : null;
+  const final_time = item.final_time ? new Date(item.final_time).getTime() : null;
+  const user_update_time = item.user_update_time ? new Date(item.user_update_time).getTime() : null;
+  const user_finish_time = item.user_finish_time ? new Date(item.user_finish_time).getTime() : null;
+
+  // 判断空投未开始
+  if (!airport_start_time || airport_start_time > now) {
+      item.status = AirportStatus.UnStart;
+  }
+  // 判断空投进行中
+  else if (!airport_end_time || now < airport_end_time) {
+      if (!user_update_time || user_update_time < now) {
+          item.status = AirportStatus.UnFinishToday;  
+      } else {
+          item.status = AirportStatus.Running;  
+      }
+  }
+  // 判断空投结束
+  else {
+      if (final_time && final_time > now) {
+          item.status = AirportStatus.Obtaining;  
+      }
+      else if (airport_end_time < now && !user_finish_time) {
+          item.status = AirportStatus.Expire;  
+      }
+      else if (user_finish_time) {
+          item.status = AirportStatus.SuccessObtain;  
+      }
+      else {
+          item.status = AirportStatus.NeedToObtain;  
+      }
+  }
+  
+  return item;
+};
+
 const EditableCell = ({
                           title,
                           editable,
