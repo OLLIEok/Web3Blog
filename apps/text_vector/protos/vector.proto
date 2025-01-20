@@ -1,0 +1,14 @@
+
+syntax = "proto3";
+
+message convertRequest{
+    string text =1;
+}
+
+message convertResponse{
+  repeated float vector = 1;
+}
+
+service TextVector{
+    rpc convertVector(convertRequest)returns(convertResponse);
+}
