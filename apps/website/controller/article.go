@@ -24,7 +24,6 @@ func GetArticle() *article {
 }
 
 func (a *article) PublishArticle(ctx *gin.Context) {
-	// userid := context.GetInt64("userid")
 	var address, ok = ctx.Get("address")
 	if !ok {
 		ctx.JSON(http.StatusOK, utils.NewFailedResponse("未登录"))
@@ -68,9 +67,8 @@ func (a *article) PublishArticle(ctx *gin.Context) {
 }
 
 func (a *article) UploadImage(context *gin.Context) {
-	//TODO this is a dangerous code, you should check the user's permission
-	userid := 1
-	if userid <= 0 {
+	var address, ok = context.Get("address")
+	if !ok {
 		context.JSON(http.StatusOK, utils.NewFailedResponse("未登录"))
 		return
 	}
@@ -88,7 +86,7 @@ func (a *article) UploadImage(context *gin.Context) {
 	if err != nil {
 		context.JSON(http.StatusOK, utils.NewFailedResponse("上传失败"))
 	}
-	fileName := fmt.Sprintf("%d_%d%s", userid, time.Now().Unix(), imgtype)
+	fileName := fmt.Sprintf("%s_%d%s", address, time.Now().Unix(), imgtype)
 	err = service.GetArticle().UploadImage(fileName, f)
 	if err != nil {
 		context.JSON(http.StatusOK, utils.NewFailedResponse("上传失败"))

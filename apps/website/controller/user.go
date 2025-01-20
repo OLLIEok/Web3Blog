@@ -18,14 +18,12 @@ func init() {
 }
 
 type user struct {
-	secret     string
-	payloadTtl time.Duration
+	secret string
 }
 
 func newUser() *user {
 	return &user{
-		secret:     viper.GetString("secret"),
-		payloadTtl: time.Duration(viper.GetInt("payloadttlsec")) * time.Second,
+		secret: viper.GetString("secret"),
 	}
 }
 

@@ -6,8 +6,8 @@ import (
 
 /*访问表*/
 type Access struct {
-	ArticleID uint `gorm:"primaryKey"`
-	AccessNum uint `gorm:"not null"`
+	ArticleID uint `gorm:"primaryKey" json:"article_id"`
+	AccessNum uint `gorm:"not null" json:"access_num"`
 }
 
 func (a *Access) TableName() string {

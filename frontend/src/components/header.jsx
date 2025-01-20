@@ -41,16 +41,16 @@ const Header = () => {
     const [searchArticles, setSearchArticles] = useState([]);
     const navItems = [
         {
-            Name: "主页",
-            Target: "/"
+            name: "主页",
+            target: "/"
         },
         {
-            Name: '空投',
-            Target: '/airport'
+            name: '空投',
+            target: '/airport'
         },
         {
-            Name: "作者简介",
-            Target: "/about"
+            name: "作者简介",
+            target: "/about"
         }]
 
     //搜索文章(isContinue:是否是跟进页数)
@@ -216,14 +216,14 @@ const Header = () => {
                         <div className=' w-2/3 flex flex-row justify-evenly'>
                             {navItems.map((item, index) => (
                                 <div onClick={() => {
-                                    navigate(item.Target)
+                                    navigate(item.target)
                                 }}
                                      style={{
 
                                          color: "#222222",
                                          fontFamily: "Basel,sans-serif"
                                      }}   className=" hover:-translate-y-1 duration-500  text-center text-xl  px-4 lg:px-8 cursor-pointer "
-                                     key={"nav" + index}>{item.Name}</div>
+                                     key={"nav" + index}>{item.name}</div>
                             ))}
                         </div>
                         <div className=" lg:pl-24 pl-6  flex justify-start ">
@@ -302,9 +302,9 @@ const Header = () => {
                         <ul className={"flex items-center justify-center flex-col"}>
                             {navItems.map((item, index) => (
                                 <li onClick={() => {
-                                    navigate(item.Target)
+                                    navigate(item.target)
                                 }}
-                                    key={"smallnav" + index}>{item.Name}</li>
+                                    key={"smallnav" + index}>{item.name}</li>
                             ))}
                         </ul>
                     </nav>

@@ -45,8 +45,8 @@ func (m *message) CreateMessages(ctx context.Context, datas []*model.Message) (e
 }
 
 type AddressMessageTemplate struct {
-	Data  []*model.Message
-	Total uint64
+	Data  []*model.Message `json:"data"`
+	Total uint64           `json:"total"`
 }
 
 func (m *message) FindMessageByAddress(ctx context.Context, address string, page int, pagesize int) (res *AddressMessageTemplate, err error) {

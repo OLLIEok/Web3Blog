@@ -9,7 +9,6 @@ const superagent = superagentPromise(_superagent, Promise);
 
 const localStorageKey = 'blog-auth-token';
 const API_ROOT ="https://www.0xdoomxy.top/blog";
-
 // const SetAuthorizetion = (token) =>{
 //     superagent('Authorization',`Bearer ${token}`);
 // }
@@ -87,13 +86,13 @@ export default function Agent({setSearchWalletModal,selectedWallet,userAccount})
     };
 
     const TagClient = {
-        GetAllTags: () => requests.get(`/tag/findall`),
+        GetAllTags: () => requests.get(`/tag/findAll`),
         GetArticleByTag: (tag, page, pagesize) => requests.get(`/tag/findArticle?tag=${encode(tag)}&page=${encode(page)}&pagesize=${encode(pagesize)}`)
     }
     const CommentClient = {
-        SearchByArticle: (articleid) => requests.get(`/comment/find?articleid=${encode(articleid)}`),
+        SearchByArticle: (articleid) => requests.get(`/comment/find?article_id=${encode(articleid)}`),
         CreateComment: (comment) => requests.post(`/comment/create`, comment),
-        DeleteComment: (id, articleid) => requests.get(`/comment/delete?articleid=${encode(articleid)}&id=${encode(id)}`)
+        DeleteComment: (id, articleid) => requests.get(`/comment/delete?article_id=${encode(articleid)}&id=${encode(id)}`)
     }
     const AirportClient = {
         UpdateAirportByUpdateTime: (id) => requests.get(`/airport/update?type=${encode("user_update_time")}&id=${encode(id)}`),
@@ -105,9 +104,9 @@ export default function Agent({setSearchWalletModal,selectedWallet,userAccount})
         FinishAirport: (id) => requests.post(`/airport/update`,{id:id,end_time:new Date()}),
         DeleteAirport: (id) => requests.get(`/airport/delete?id=${encode(id)}`),
         CleanAirport: (airportid) => requests.get(`/airport/clean?id=${encode(airportid)}`),
-        FindAirportByAddress: (page, pageSize) => requests.get(`/airport/findmy?page=${encode(page)}&pagesize=${encode(pageSize)}`),
-        FindRunningAirport: (page, pageSize) => requests.get(`/airport/findrunning?page=${encode(page)}&pagesize=${encode(pageSize)}`),
-        FindFinishAirport: (page, pageSize) => requests.get(`/airport/findfinish?page=${encode(page)}&pagesize=${encode(pageSize)}`)
+        FindAirportByAddress: (page, pageSize) => requests.get(`/airport/findMy?page=${encode(page)}&pagesize=${encode(pageSize)}`),
+        FindRunningAirport: (page, pageSize) => requests.get(`/airport/findRunning?page=${encode(page)}&pagesize=${encode(pageSize)}`),
+        FindFinishAirport: (page, pageSize) => requests.get(`/airport/findFinish?page=${encode(page)}&pagesize=${encode(pageSize)}`)
     }
     const ArticleClient = {
         ImageDownload: (file) => requests.get(`/article/image/download?filename=${encode(file)}`),
@@ -115,15 +114,15 @@ export default function Agent({setSearchWalletModal,selectedWallet,userAccount})
         ImageDownloadUrl: (filename) => `/blog/article/image/download?filename=${encode(filename)}`,
         Publish: (article) => requests.post(`/article/publish`, article),
         Find: (articleId) => requests.get(`/article/find?id=${encode(articleId)}`),
-        FindMaxAccess: (page, pagesize) => requests.get(`/article/findbymaxaccess?page=${encode(page)}&pagesize=${encode(pagesize)}`),
-        FindNewest: (page, pagesize) => requests.get(`/article/findbycreatetime?page=${encode(page)}&pagesize=${encode(pagesize)}`),
+        FindMaxAccess: (page, pagesize) => requests.get(`/article/findByMaxAccess?page=${encode(page)}&pagesize=${encode(pagesize)}`),
+        FindNewest: (page, pagesize) => requests.get(`/article/findByCreateTime?page=${encode(page)}&pagesize=${encode(pagesize)}`),
         Search: (keyword, page, pagesize) => requests.get(`/article/search?page=${encode(page)}&pagesize=${encode(pagesize)}&keyword=${encode(keyword)}`)
     }
 
     const LikeClient = {
-        Add: (articleId, userid) => requests.get(`/like/confirm?articleid=${encode(articleId)}&userid=${encode(userid)}`),
-        Remove: (articleId, userid) => requests.get(`/like/cancel?articleid=${encode(articleId)}&userid=${encode(userid)}`),
-        Find: (articleId, userid) => requests.get(`/like/exist?articleid=${encode(articleId)}&userid=${encode(userid)}`)
+        Add: (articleId) => requests.get(`/like/confirm?article_id=${encode(articleId)}`),
+        Remove: (articleId) => requests.get(`/like/cancel?article_id=${encode(articleId)}`),
+        Find: (articleId) => requests.get(`/like/exist?article_id=${encode(articleId)}`)
 
     }
 

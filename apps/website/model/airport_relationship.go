@@ -12,7 +12,7 @@ type AirportRelationship struct {
 	UpdateTime  *time.Time `gorm:"type:datetime" json:"update_time"`
 	FinishTime  *time.Time `gorm:"type:datetime" json:"finish_time"`
 	DeleteTime  *time.Time `gorm:"type:datetime;" json:"delete_time"`
-	Balance     float64    `gorm:"type:float"`
+	Balance     float64    `gorm:"type:float" json:"balance"`
 }
 
 func (ar *AirportRelationship) TableName() string {

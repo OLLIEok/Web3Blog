@@ -26,9 +26,9 @@ func (c *comment) CreateComment(ctx *gin.Context) {
 	}
 	var err error
 	var comment struct {
-		ArticleID uint   `json:"articleid"`
+		ArticleID uint   `json:"article_id"`
 		Content   string `json:"content"`
-		TopID     int    `json:"topid"`
+		TopID     int    `json:"top_id"`
 	}
 	err = ctx.BindJSON(&comment)
 	if err != nil {
@@ -48,7 +48,7 @@ func (c *comment) CreateComment(ctx *gin.Context) {
 }
 
 func (c *comment) FindCommentByArticle(ctx *gin.Context) {
-	articleidStr := ctx.Query("articleid")
+	articleidStr := ctx.Query("article_id")
 	articleid, err := strconv.ParseUint(articleidStr, 10, 64)
 	if err != nil {
 		ctx.JSON(http.StatusOK, utils.NewFailedResponse("参数错误"))
@@ -64,7 +64,7 @@ func (c *comment) FindCommentByArticle(ctx *gin.Context) {
 
 func (c *comment) DeleteComment(ctx *gin.Context) {
 	creator := ctx.GetString("address")
-	articleidStr := ctx.Query("articleid")
+	articleidStr := ctx.Query("article_id")
 	articleid, err := strconv.ParseUint(articleidStr, 10, 64)
 	if err != nil {
 		ctx.JSON(http.StatusOK, utils.NewFailedResponse("参数错误"))

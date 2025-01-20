@@ -4,8 +4,8 @@ import "encoding/json"
 
 /*标签表*/
 type Tag struct {
-	Name       string `gorm:"type:varchar(255);primaryKey"`
-	ArticleNum uint   `gorm:"not null"`
+	Name       string `gorm:"type:varchar(255);primaryKey" json:"name"`
+	ArticleNum uint   `gorm:"not null" json:"article_num"`
 }
 
 func (tag *Tag) TableName() string {

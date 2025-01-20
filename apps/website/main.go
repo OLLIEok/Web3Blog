@@ -68,13 +68,13 @@ func bindMessageRoutes(engine *gin.Engine) {
 }
 func bindAirportRoutes(engine *gin.Engine) {
 	route := engine.Group("/airport")
-	route.GET("/findrunning", func(ctx *gin.Context) {
+	route.GET("/findRunning", func(ctx *gin.Context) {
 		controller.GetAirport().FindRunningAirport(ctx)
 	})
-	route.GET("/findfinish", func(ctx *gin.Context) {
+	route.GET("/findFinish", func(ctx *gin.Context) {
 		controller.GetAirport().FindFinishAirport(ctx)
 	})
-	route.GET("/findmy", jwt.NewVerifyMiddleware(), func(ctx *gin.Context) {
+	route.GET("/findMy", jwt.NewVerifyMiddleware(), func(ctx *gin.Context) {
 		controller.GetAirport().FindMyAirport(ctx)
 	})
 	route.POST("/create", jwt.NewVerifyMiddleware(), whitepaper.WhitepaperMiddleware(), func(ctx *gin.Context) {
@@ -89,9 +89,9 @@ func bindAirportRoutes(engine *gin.Engine) {
 	route.GET("/update", jwt.NewVerifyMiddleware(), func(context *gin.Context) {
 		controller.GetAirport().UpdateAirport(context)
 	})
-	route.POST("update", jwt.NewVerifyMiddleware(), whitepaper.WhitepaperMiddleware(), func(ctx *gin.Context) {
-		controller.GetAirport().UpdateAirportInfo(ctx)
-	})
+	// route.POST("update", jwt.NewVerifyMiddleware(), whitepaper.WhitepaperMiddleware(), func(ctx *gin.Context) {
+	// 	controller.GetAirport().UpdateAirportInfo(ctx)
+	// })
 }
 
 func bindArticleRoutes(engine *gin.Engine) {
@@ -106,10 +106,10 @@ func bindArticleRoutes(engine *gin.Engine) {
 	route.POST("/publish", jwt.NewVerifyMiddleware(), func(ctx *gin.Context) {
 		controller.GetArticle().PublishArticle(ctx)
 	})
-	route.GET("/findbymaxaccess", func(ctx *gin.Context) {
+	route.GET("/findByMaxAccess", func(ctx *gin.Context) {
 		controller.GetArticle().FindArticleByMaxAccessNum(ctx)
 	})
-	route.GET("/findbycreatetime", func(ctx *gin.Context) {
+	route.GET("/findByCreateTime", func(ctx *gin.Context) {
 		controller.GetArticle().FindArticleByCreateTime(ctx)
 	})
 	route.GET("/find", func(ctx *gin.Context) {
@@ -162,7 +162,7 @@ func bindUserRoutes(engine *gin.Engine) {
 
 func bindTagRoutes(engine *gin.Engine) {
 	router := engine.Group("/tag")
-	router.GET("/findall", func(ctx *gin.Context) {
+	router.GET("/findAll", func(ctx *gin.Context) {
 		controller.GetTag().GetAllTags(ctx)
 	})
 	router.GET("/findArticle", func(ctx *gin.Context) {

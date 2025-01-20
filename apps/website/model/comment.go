@@ -7,12 +7,12 @@ import (
 
 /*评论表*/
 type Comment struct {
-	ID        uint `gorm:"primarykey;autoIncrement"`
-	CreateAt  time.Time
-	TopID     uint   `gorm:"not null;index:search"`
-	Content   string `gorm:"type:varchar(255);not null"`
-	ArticleID uint   `gorm:"not null;index:search"`
-	Creator   string `gorm:"varchar(64) not null;index:search"`
+	ID        uint      `gorm:"primarykey;autoIncrement" json:"id"`
+	CreateAt  time.Time `json:"create_at"`
+	TopID     uint      `gorm:"not null;index:search" json:"top_id"`
+	Content   string    `gorm:"type:varchar(255);not null" json:"content"`
+	ArticleID uint      `gorm:"not null;index:search" json:"article_id"`
+	Creator   string    `gorm:"type:varchar(64);not null;index:search" json:"creator"`
 }
 
 func (comment *Comment) TableName() string {

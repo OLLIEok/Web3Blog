@@ -55,7 +55,7 @@ const Notifications = () => {
         if (!response || !response.status) {
           throw new Error("查询消息失败");
         }
-        return response.data.Data;
+        return response.data.data;
       })
       .catch((error) => {
         toast.error(error.message || "查询消息失败");
@@ -70,8 +70,8 @@ const Notifications = () => {
   const markAsRead = (messageId) => {
     readNotification(messageId).then(() => {
       const updatedMessages = notificationsData.all.map((message) => {
-        if (message.Id === messageId) {
-          return { ...message, HasReply: true }; 
+        if (message.id === messageId) {
+          return { ...message, has_reply: true }; 
         }
         return message;
       });
@@ -141,7 +141,7 @@ const Notifications = () => {
             <div>
               {notificationsData.all.map((message) => (
                 <motion.div
-                  key={message.Id}
+                  key={message.id}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -162,16 +162,17 @@ const Notifications = () => {
                     onMouseLeave={(e) => {
                       e.currentTarget.style.backgroundColor = "";
                     }}
+                    onClick={()=>{!message.has_reply&&markAsRead(message.id)}}
                   >
                     <Row>
                       <Col span={20}>
                         <h4 style={{ fontSize: "16px", fontWeight: "bold" }}>
-                          {message.Content}
+                          {message.content}
                         </h4>
                       </Col>
                       <Col span={4} style={{ textAlign: "right" }}>
                         <Badge
-                          dot={!message.HasReply}
+                          dot={!message.has_reply}
                           style={{ backgroundColor: "#1890ff",transform: "scale(1.3)" }}
                         />
                       </Col>
@@ -180,37 +181,8 @@ const Notifications = () => {
                       justify="space-between"
                       style={{ fontSize: "12px", marginTop: 10 }}
                     >
-                      <Col>{new Date(message.CreateTime).toLocaleString()}</Col>
-                      <Col>
-                        {message.HasReply ? (
-                          <span
-                            style={{
-                              color: "#666",
-                              fontSize: "14px",
-                              fontWeight: "bold",
-                            }}
-                          >
-                            <CheckCircleOutlined style={{ color: "#4CAF50" }} />{" "}
-                            已读
-                          </span>
-                        ) : (
-                          <Button
-                            size="small"
-                            style={{
-                              backgroundColor: "rgb(51, 51, 51)",
-                              fontSize: "13px",
-                              color: "white",
-                              borderRadius: "5px",
-                            }}
-                            onClick={() => {
-                              // e.stopPropagation();
-                              markAsRead(message.Id);
-                            }}
-                          >
-                            Mark
-                          </Button>
-                        )}
-                      </Col>
+                      <Col>{new Date(message.create_time).toLocaleString()}</Col>
+
                     </Row>
                   </Card>
                 </motion.div>

@@ -19,7 +19,7 @@ func GetLike() *like {
 }
 
 func (l *like) SetAsLike(ctx *gin.Context) {
-	articleId, err := strconv.Atoi(ctx.Query("articleid"))
+	articleId, err := strconv.Atoi(ctx.Query("article_id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.NewFailedResponse("参数出错"))
 		return
@@ -38,7 +38,7 @@ func (l *like) SetAsLike(ctx *gin.Context) {
 }
 
 func (l *like) CancelLike(ctx *gin.Context) {
-	articleId, err := strconv.Atoi(ctx.Query("articleid"))
+	articleId, err := strconv.Atoi(ctx.Query("article_id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.NewFailedResponse("参数出错"))
 		return
@@ -57,7 +57,7 @@ func (l *like) CancelLike(ctx *gin.Context) {
 }
 
 func (l *like) IsExist(ctx *gin.Context) {
-	articleId, err := strconv.Atoi(ctx.Query("articleid"))
+	articleId, err := strconv.Atoi(ctx.Query("article_id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.NewFailedResponse("参数出错"))
 		return

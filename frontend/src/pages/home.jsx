@@ -151,14 +151,14 @@ const HomePage = () => {
                                 <div
                                     className="  my-3 min-h-8 h-8  min-w-24 max-w-28 justify-center rounded-xl flex  text-center text-lg cursor-pointer  "
                                     onClick={() => {
-                                        navigate(`/articles/tag?tag=${item.Name}`)
-                                    }} key={"tag" + item.Name}>
+                                        navigate(`/articles/tag?tag=${item.name}`)
+                                    }} key={"tag" + item.name}>
                                     <p style={{
                                         color: "#222222",
                                         fontFamily: "Basel,sans-serif"
-                                    }} className=" lg:text-md hover:text-blue-500 text-xl ">{item.Name}</p>
+                                    }} className=" lg:text-md hover:text-blue-500 text-xl ">{item.name}</p>
                                     <div
-                                        className="min-w-6 min-h-3 h-4 bg-stone-200  text-xs rounded-lg ">{item.ArticleNum}</div>
+                                        className="min-w-6 min-h-3 h-4 bg-stone-200  text-xs rounded-lg ">{item.article_num}</div>
                                 </div>
                             )
                         })}
