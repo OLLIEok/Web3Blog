@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Drawer, Badge, Tabs, List, Card, Button, Row, Col } from "antd";
-import { BellOutlined, CheckCircleOutlined } from "@ant-design/icons";
+import { Drawer, Badge, Tabs, Card, Row, Col, Pagination } from "antd";
+import { BellOutlined } from "@ant-design/icons";
 import { motion } from "framer-motion";
 import { Web3Wallet } from "../App";
 import { toast } from "react-toastify"; 
 import { HttpAgent } from "../agent/agent.jsx"; 
-
 
 const Notifications = () => {
   const [visible, setVisible] = useState(false);
@@ -20,6 +19,10 @@ const Notifications = () => {
   const { userAccount } = useContext(Web3Wallet);
   const { MessageClient } = useContext(HttpAgent);
 
+  const [totals, setTotals] = useState(0); 
+  const [currentPage, setCurrentPage] = useState(1);  
+  const [totalPages, setTotalPages] = useState(1);     
+  const [loading, setLoading] = useState(false);       
 
   const getTotalNotifications = () => {
     return MessageClient.GetTotal()
@@ -50,15 +53,25 @@ const Notifications = () => {
   };
 
   const findAllMessages = (page, pageSize) => {
+    setLoading(true); 
     return MessageClient.FindAllMessage(page, pageSize)
       .then((response) => {
         if (!response || !response.status) {
           throw new Error("查询消息失败");
         }
-        return response.data.data;
+        const messages = response.data.data;
+        const total = response.data.total;  
+        setTotals(total)
+        setNotificationsData({
+          all: messages,  
+        });
+
+        setTotalPages(Math.ceil(total / pageSize)); 
+        setLoading(false); 
       })
       .catch((error) => {
         toast.error(error.message || "查询消息失败");
+        setLoading(false); 
         throw error;
       });
   };
@@ -75,19 +88,18 @@ const Notifications = () => {
         }
         return message;
       });
-  
+
       setNotificationsData((prevData) => ({
         ...prevData,
         all: updatedMessages, 
       }));
-  
+
       getTotalNotifications().then((data) => {
         setUnReadNum(data);
         setBadgeColor(data <= 3 ? "orange" : "red");
       });
     });
   };
-  
 
   useEffect(() => {
     if (userAccount) {
@@ -100,13 +112,10 @@ const Notifications = () => {
         }
       });
 
-      findAllMessages(1, 5).then(allMessages => {
-        setNotificationsData({
-          all: allMessages,
-        });
-      });
+      // 获取当前页的消息
+      findAllMessages(currentPage, 5).then(() => {});
     }
-  }, [userAccount]);
+  }, [userAccount, currentPage]);  
 
   return (
     <>
@@ -117,17 +126,22 @@ const Notifications = () => {
             className="top-1 right-3"
             style={{ backgroundColor: badgeColor }}
           >
-            <BellOutlined className="text-2xl cursor-pointer" onClick={()=>setVisible(true)} />
+            <BellOutlined className="text-2xl cursor-pointer" onClick={() => setVisible(true)} />
           </Badge>
         </div>
       )}
 
       <Drawer
-        title="Notifications"
+        title="通知"
         placement="right"
         width={400}
         visible={visible}
         onClose={onClose}
+        styles={{
+          body: {
+            padding: '20px',  
+          },
+        }}
       >
         <Tabs
           defaultActiveKey="all"
@@ -137,7 +151,7 @@ const Notifications = () => {
             justifyContent: "center",
           }}
         >
-          <Tabs.TabPane tab="All" key="all">
+          <Tabs.TabPane tab="全部" key="all">
             <div>
               {notificationsData.all.map((message) => (
                 <motion.div
@@ -155,14 +169,7 @@ const Notifications = () => {
                       boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
                     }}
                     hoverable
-                    // onClick={() => !message.HasReply && markAsRead(message.Id)}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.backgroundColor = "#f0f0f0")
-                    }
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "";
-                    }}
-                    onClick={()=>{!message.has_reply&&markAsRead(message.id)}}
+                    onClick={() => {!message.has_reply && markAsRead(message.id)}}
                   >
                     <Row>
                       <Col span={20}>
@@ -173,20 +180,28 @@ const Notifications = () => {
                       <Col span={4} style={{ textAlign: "right" }}>
                         <Badge
                           dot={!message.has_reply}
-                          style={{ backgroundColor: "#1890ff",transform: "scale(1.3)" }}
+                          style={{ backgroundColor: "#1890ff", transform: "scale(1.3)" }}
                         />
                       </Col>
                     </Row>
-                    <Row
-                      justify="space-between"
-                      style={{ fontSize: "12px", marginTop: 10 }}
-                    >
+                    <Row justify="space-between" style={{ fontSize: "12px", marginTop: 10 }}>
                       <Col>{new Date(message.create_time).toLocaleString()}</Col>
-
                     </Row>
                   </Card>
                 </motion.div>
               ))}
+            </div>
+
+            <div style={{ marginTop: "20px", textAlign: "center" }}>
+              <Pagination
+                align="end"
+                current={currentPage}
+                showTotal={(total) => `共 ${total} 条`}
+                total={totals}  
+                pageSize={5}            
+                onChange={(page) => setCurrentPage(page)} 
+                showSizeChanger={false} 
+              />
             </div>
           </Tabs.TabPane>
         </Tabs>
